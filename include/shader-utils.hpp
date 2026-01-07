@@ -1,0 +1,11 @@
+#pragma once
+
+#include<string>
+#include<glad/glad.h>
+
+namespace Example
+{
+	GLuint compileShader(GLenum type, const char* source, const std::string& name = "-UNNAMED-");
+	GLuint linkShaderProgram(GLuint vertexShader, GLuint fragmentShader, const std::string& name = "-UNNAMED-");
+	GLuint compileAndLinkShaderProgram(const char* vertexSource, const char* fragmentSource, const std::string& name = "-UNNAMED-");
+}
