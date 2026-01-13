@@ -131,16 +131,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="dependencies\dependencies\glad\src\glad.c" />
+    <ClCompile Include="Room.cpp" />
+    <ClCompile Include="Showroom.cpp" />
     <ClCompile Include="src\basic-shape.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\shader-utils.cpp" />
     <ClCompile Include="src\textured-shape.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.hpp" />
     <ClInclude Include="include\basic-shape.hpp" />
     <ClInclude Include="include\shader-utils.hpp" />
     <ClInclude Include="include\textured-shape.hpp" />
+    <ClInclude Include="Room.hpp" />
+    <ClInclude Include="Showroom.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
