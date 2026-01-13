@@ -1,51 +1,42 @@
 ﻿#pragma once
 
-// ---- تضمين المكاتب الخارجية ---- //
+#include <vector>
 
-// من أجل استخدام اصدار حديث من الأوبن جي ال
-// لا بد من استخدام مكتبة وسيطة
-// GLAD: https://github.com/Dav1dde/glad, https://glad.dav1d.de/
-// المرجع: https://docs.gl/ أو https://devdocs.io/
 #include <glad/glad.h>
-
-// للتعامل مع الأشعة والمصفوفات الرياضية
-// وانشاء مصفوفات تحويلات هندسية وإسقاط
-// GLM: OpenGL Mathematics: https://github.com/g-truc/glm/
-// دليل المستخدم: https://github.com/g-truc/glm/blob/master/manual.md
-// لربما من الأحسن الإعتماد على التتمة التلقائية أثناء الكتابة،
-// أو قراءة ملفات التوريس مباشرة.
 #include <glm/glm.hpp>
-#include <glm/ext.hpp>
 
 namespace Example
 {
-	struct TexturedVertex
-	{
-		glm::vec3 position;
-		glm::vec3 color;
-		glm::vec2 uv;
-	};
+    struct TexturedVertex
+    {
+        glm::vec3 position;
+        glm::vec3 color;
+        glm::vec2 uv;
+    };
 
-	class TexturedShape
-	{
-	protected:
-		int verticesCount = 0;
+    class TexturedShape
+    {
+    protected:
+        GLuint VAO = 0;
+        GLuint VBO = 0;
+        int vertexCount = 0;
 
-		GLuint cameraLocation = 0, transformLocation = 0;
-		GLuint VAO = 0, VBO = 0;
+        static GLuint shaderProgram;
+        static GLuint cameraLoc;
+        static GLuint transformLoc;
+        static bool shaderReady;
 
-		GLenum drawMode = GL_TRIANGLES;
+        static void compileShader();
 
-	public:
-		static GLuint shaderProgram;
-		static void compileShapeShader();
+    public:
+        TexturedShape();
+        TexturedShape(const std::vector<TexturedVertex>& vertices);
+        ~TexturedShape();
 
-		TexturedShape();
-		TexturedShape(const std::vector<TexturedVertex>& vertices, GLenum drawMode = GL_TRIANGLES);
-		~TexturedShape();
+        TexturedShape(TexturedShape&& other) noexcept;
+        TexturedShape& operator=(TexturedShape&& other) noexcept;
 
-		TexturedShape& operator=(TexturedShape&& other) noexcept;
-
-		void render(const glm::mat4& transform = { 1.0f }, const glm::mat4& camera = { 1.0f }) const;
-	};
+        void render(const glm::mat4& model,
+            const glm::mat4& camera) const;
+    };
 }

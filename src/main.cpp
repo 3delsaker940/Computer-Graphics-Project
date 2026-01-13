@@ -2,158 +2,145 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
-
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/io.hpp>
-
-#include <string>
-#include <vector>
 #include <iostream>
 
+// تأكد من صحة المسارات بناءً على بنية مجلداتك
 #include "basic-shape.hpp"
-#include "textured-shape.hpp"
+#include "../Camera.hpp" // إذا كان ملف الكاميرا في المجلد الأب
+#include "../Showroom.hpp"
 
-namespace Colors
-{
-	glm::vec3 red{ 1.f, 0.f, 0.f };
-	glm::vec3 green{ 0.f, 1.f, 0.f };
-	glm::vec3 blue{ 0.f, 0.f, 1.f };
-
-	glm::vec3 white{ 1.f, 1.f, 1.f };
-	glm::vec3 black{ 0.f, 0.f, 0.f };
-
-	glm::vec3 yellow{ 1.f, 1.f, 0.f };
-	glm::vec3 magenta{ 1.f, 0.f, 1.f };
-	glm::vec3 cyan{ 0.f, 1.f, 1.f };
-}
-
-class Application
-{
+class Application {
 public:
-	Example::BasicShape shape;
+    GLFWwindow* window;
+    float lastFrameTime = 0.0f;
 
-	glm::mat4 transform = { 1.0f };
-	glm::mat4 camera = { 1.0f };
+    // تعريف الكائنات داخل الكلاس لضمان تهيئتها بعد Glad
+    Example::Camera appCamera;
+    Example::Showroom showroom;
 
-	void onInit()
-	{
-		using namespace Colors;
+    // Constructor لتهيئة الكاميرا في موقع افتراضي
+    Application() : appCamera(glm::vec3(0.0f, 1.7f, 10.0f)), window(nullptr) {}
 
-		shape = Example::BasicShape({
-			{ {0.0f, 0.0f, 0.8f }, red },
-			{ {0.0f, 0.5f, -0.5f}, green },
-			{ {0.0f, -0.5f, -0.5f}, blue },
-			});
-	}
+    void onInit() {
+        // تهيئة الشيدرز وبناء الصالات
+        Example::BasicShape::compileShapeShader();
+        showroom.init();
+        std::cout << "Showroom Initialized Successfully!" << std::endl;
+    }
 
-	void onUpdate(float t, float dt)
-	{
-		transform = glm::identity<glm::mat4>();
-		transform = glm::rotate(transform, glm::radians(t * 60.0f), { 0.0f, 0.0f, 1.0f });
-		transform = glm::translate(transform, { 0.0f, 0.0f, glm::sin(glm::radians(t * 45.0f)) * 0.1f - 0.1f });
-	}
+    void onUpdate() {
+        // حساب الوقت المستغرق بين الإطارات (Delta Time)
+        float t = (float)glfwGetTime();
+        float dt = t - lastFrameTime;
+        lastFrameTime = t;
 
-	void onDraw(float t, float dt)
-	{
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // 1. معالجة المدخلات (الحركة)
+        glm::vec3 oldPos = appCamera.Position;
+        handleInput(dt);
 
-		shape.render(transform, camera);
-	}
+        // 2. تطبيق نظام التصادم (Collision)
+        // نمرر الموقع القديم والجديد لضمان عدم اختراق الجدران
+        appCamera.Position = showroom.checkCollision(oldPos, appCamera.Position);
 
-	void onExit()
-	{
-	}
+        // تثبيت ارتفاع الكاميرا (محاكاة مشي الإنسان)
+        appCamera.Position.y = 1.7f;
 
-	void updateCamera(float t, float dt)
-	{
-		float distance = 2.4f;
+        // 3. إعداد مصفوفات العرض والإسقاط
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
+        glViewport(0, 0, width, height);
 
-		glm::mat4 view = glm::lookAt(
-			glm::vec3{ distance, 0.0f, 0.0f },
-			glm::vec3{ 0.0f, 0.0f, 0.0f },
-			glm::vec3{ 0.0f, 0.0f, 1.0f });
+        float aspectRatio = (float)width / (float)height;
+        glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 300.0f);
+        glm::mat4 viewProj = projection * appCamera.GetViewMatrix();
 
-		int width, height;
-		glfwGetWindowSize(window, &width, &height);
-		float aspect = static_cast<float>(width) / static_cast<float>(height);
+        // 4. عمليات الرسم
+        glClearColor(0.05f, 0.05f, 0.1f, 1.0f); // لون خلفية ليلي هادئ
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glm::mat4 projection = glm::perspective(
-			glm::radians(45.0f), aspect, 0.1f, 1000.0f);
+        showroom.renderAll(viewProj);
+    }
 
-		camera = projection * view;
-	}
+private:
+    void handleInput(float dt) {
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) appCamera.ProcessKeyboard("FORWARD", dt);
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) appCamera.ProcessKeyboard("BACKWARD", dt);
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) appCamera.ProcessKeyboard("LEFT", dt);
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) appCamera.ProcessKeyboard("RIGHT", dt);
 
-	GLFWwindow* window;
-
-	void initializeWindowAndGraphics(int width, int height, const char* windowTitle)
-	{
-		glfwWindowHint(GLFW_DEPTH_BITS, 24);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-
-		window = glfwCreateWindow(width, height, windowTitle, NULL, NULL);
-		if (!window)
-		{
-			glfwTerminate();
-			std::exit(-1);
-		}
-
-		glfwMakeContextCurrent(window);
-
-		glfwSwapInterval(1);
-
-		if (!gladLoadGL()) {
-			std::cerr << "Failed to initialize GLAD (OpenGL)!" << std::endl;
-			std::exit(-1);
-		}
-
-		glEnable(GL_DEPTH_TEST);
-	}
-
-	float lastFrameTime;
-
-	void runEventLoop()
-	{
-		onInit();
-
-		glfwSetFramebufferSizeCallback(window, Application::glfw_resize_callback);
-
-		while (!glfwWindowShouldClose(window))
-		{
-			float t = static_cast<float>(glfwGetTime());
-			float dt = t - lastFrameTime;
-			lastFrameTime = t;
-
-			updateCamera(t, dt);
-
-			onUpdate(t, dt);
-			onDraw(t, dt);
-
-			glfwSwapBuffers(window);
-
-			glfwPollEvents();
-		}
-
-		onExit();
-	}
-
-	static void glfw_resize_callback(GLFWwindow* window, int width, int height)
-	{
-		glViewport(0, 0, width, height);
-	}
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+            glfwSetWindowShouldClose(window, true);
+    }
 };
 
-int main(int argc, char** args)
-{
-	if (!glfwInit())
-		return -1;
+// مؤشر عالمي للوصول إلى التطبيق من داخل الكوالباك
+Application* g_AppInstance = nullptr;
 
-	Application application;
-	application.initializeWindowAndGraphics(
-		800, 600, "OpenGL Application (GLFW, VS)");
-	application.runEventLoop();
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    static float lastX = 640, lastY = 360;
+    static bool firstMouse = true;
 
-	glfwTerminate();
+    if (firstMouse) {
+        lastX = (float)xpos;
+        lastY = (float)ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = (float)xpos - lastX;
+    float yoffset = lastY - (float)ypos;
+
+    lastX = (float)xpos;
+    lastY = (float)ypos;
+
+    if (g_AppInstance) {
+        g_AppInstance->appCamera.ProcessMouseMovement(xoffset, yoffset);
+    }
+}
+
+int main() {
+    // 1. تهيئة GLFW
+    if (!glfwInit()) {
+        std::cerr << "Failed to initialize GLFW" << std::endl;
+        return -1;
+    }
+
+    // 2. إنشاء كائن التطبيق
+    Application app;
+    g_AppInstance = &app;
+
+    // 3. إعداد النافذة
+    app.window = glfwCreateWindow(1280, 720, "Interative Car Showroom - OpenGL", NULL, NULL);
+    if (!app.window) {
+        glfwTerminate();
+        return -1;
+    }
+
+    glfwMakeContextCurrent(app.window);
+    glfwSetCursorPosCallback(app.window, mouse_callback);
+    glfwSetInputMode(app.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    // 4. تحميل وظائف OpenGL بواسطة GLAD
+    if (!gladLoadGL()) {
+        std::cerr << "Failed to initialize GLAD" << std::endl;
+        return -1;
+    }
+
+    // 5. إعدادات OpenGL العامة
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // 6.تهيئة الموارد (الصالات، الشيدرز)
+    app.onInit();
+
+    // 7. حلقة البرنامج الأساسية
+    while (!glfwWindowShouldClose(app.window)) {
+        app.onUpdate();
+
+        glfwSwapBuffers(app.window);
+        glfwPollEvents();
+    }
+
+    glfwTerminate();
+    return 0;
 }
