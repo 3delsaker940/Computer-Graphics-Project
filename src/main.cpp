@@ -9,9 +9,10 @@
 #include "../Camera.hpp" // إذا كان ملف الكاميرا في المجلد الأب
 #include "../Showroom.hpp"
 
-class Application {
+class Application
+{
 public:
-    GLFWwindow* window;
+    GLFWwindow *window;
     float lastFrameTime = 0.0f;
 
     // تعريف الكائنات داخل الكلاس لضمان تهيئتها بعد Glad
@@ -21,14 +22,16 @@ public:
     // Constructor لتهيئة الكاميرا في موقع افتراضي
     Application() : appCamera(glm::vec3(0.0f, 1.7f, 10.0f)), window(nullptr) {}
 
-    void onInit() {
+    void onInit()
+    {
         // تهيئة الشيدرز وبناء الصالات
         Example::BasicShape::compileShapeShader();
         showroom.init();
         std::cout << "Showroom Initialized Successfully!" << std::endl;
     }
 
-    void onUpdate() {
+    void onUpdate()
+    {
         // حساب الوقت المستغرق بين الإطارات (Delta Time)
         float t = (float)glfwGetTime();
         float dt = t - lastFrameTime;
@@ -62,11 +65,16 @@ public:
     }
 
 private:
-    void handleInput(float dt) {
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) appCamera.ProcessKeyboard("FORWARD", dt);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) appCamera.ProcessKeyboard("BACKWARD", dt);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) appCamera.ProcessKeyboard("LEFT", dt);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) appCamera.ProcessKeyboard("RIGHT", dt);
+    void handleInput(float dt)
+    {
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            appCamera.ProcessKeyboard("FORWARD", dt);
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            appCamera.ProcessKeyboard("BACKWARD", dt);
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            appCamera.ProcessKeyboard("LEFT", dt);
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            appCamera.ProcessKeyboard("RIGHT", dt);
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
@@ -74,13 +82,15 @@ private:
 };
 
 // مؤشر عالمي للوصول إلى التطبيق من داخل الكوالباك
-Application* g_AppInstance = nullptr;
+Application *g_AppInstance = nullptr;
 
-void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+void mouse_callback(GLFWwindow *window, double xpos, double ypos)
+{
     static float lastX = 640, lastY = 360;
     static bool firstMouse = true;
 
-    if (firstMouse) {
+    if (firstMouse)
+    {
         lastX = (float)xpos;
         lastY = (float)ypos;
         firstMouse = false;
@@ -92,14 +102,17 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     lastX = (float)xpos;
     lastY = (float)ypos;
 
-    if (g_AppInstance) {
+    if (g_AppInstance)
+    {
         g_AppInstance->appCamera.ProcessMouseMovement(xoffset, yoffset);
     }
 }
 
-int main() {
+int main()
+{
     // 1. تهيئة GLFW
-    if (!glfwInit()) {
+    if (!glfwInit())
+    {
         std::cerr << "Failed to initialize GLFW" << std::endl;
         return -1;
     }
@@ -110,7 +123,8 @@ int main() {
 
     // 3. إعداد النافذة
     app.window = glfwCreateWindow(1280, 720, "Interative Car Showroom - OpenGL", NULL, NULL);
-    if (!app.window) {
+    if (!app.window)
+    {
         glfwTerminate();
         return -1;
     }
@@ -120,7 +134,8 @@ int main() {
     glfwSetInputMode(app.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // 4. تحميل وظائف OpenGL بواسطة GLAD
-    if (!gladLoadGL()) {
+    if (!gladLoadGL())
+    {
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
@@ -134,7 +149,8 @@ int main() {
     app.onInit();
 
     // 7. حلقة البرنامج الأساسية
-    while (!glfwWindowShouldClose(app.window)) {
+    while (!glfwWindowShouldClose(app.window))
+    {
         app.onUpdate();
 
         glfwSwapBuffers(app.window);

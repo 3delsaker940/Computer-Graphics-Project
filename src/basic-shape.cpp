@@ -6,7 +6,7 @@
 #include "shader-utils.hpp"
 #include "basic-shape.hpp"
 
-static const char* BASIC_VERTEX_SHADER_SRC = R"(
+static const char *BASIC_VERTEX_SHADER_SRC = R"(
 #version 330 core
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aColor;
@@ -22,7 +22,7 @@ vertexColor = aColor;
 }
 )";
 
-static const char* BASIC_FRAMGENT_SHADER_SRC = R"(
+static const char *BASIC_FRAMGENT_SHADER_SRC = R"(
 #version 330 core
 
 in vec3 vertexColor;
@@ -40,7 +40,8 @@ namespace Example
 
 	void BasicShape::compileShapeShader()
 	{
-		if (shaderProgram != 0) return;
+		if (shaderProgram != 0)
+			return;
 		shaderProgram = compileAndLinkShaderProgram(BASIC_VERTEX_SHADER_SRC, BASIC_FRAMGENT_SHADER_SRC, "basic-shader");
 	}
 
@@ -49,10 +50,11 @@ namespace Example
 		verticesCount = 0;
 	}
 
-	BasicShape::BasicShape(const std::vector<BasicVertex>& vertices, GLenum drawMode)
+	BasicShape::BasicShape(const std::vector<BasicVertex> &vertices, GLenum drawMode)
 	{
 		verticesCount = vertices.size();
-		if (verticesCount == 0) return;
+		if (verticesCount == 0)
+			return;
 
 		this->drawMode = drawMode;
 
@@ -67,10 +69,10 @@ namespace Example
 		glGenVertexArrays(1, &VAO);
 		glBindVertexArray(VAO);
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BasicVertex), (void*)(offsetof(BasicVertex, position)));
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BasicVertex), (void *)(offsetof(BasicVertex, position)));
 		glEnableVertexAttribArray(0);
 
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(BasicVertex), (void*)(offsetof(BasicVertex, color)));
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(BasicVertex), (void *)(offsetof(BasicVertex, color)));
 		glEnableVertexAttribArray(1);
 
 		cameraLocation = glGetUniformLocation(shaderProgram, "camera");
@@ -79,7 +81,8 @@ namespace Example
 
 	BasicShape::~BasicShape()
 	{
-		if (verticesCount == 0) return;
+		if (verticesCount == 0)
+			return;
 
 		glDeleteVertexArrays(1, &VAO);
 		glDeleteBuffers(1, &VBO);
@@ -88,11 +91,12 @@ namespace Example
 		verticesCount = 0;
 	}
 
-	BasicShape& BasicShape::operator=(BasicShape&& other) noexcept
+	BasicShape &BasicShape::operator=(BasicShape &&other) noexcept
 	{
 		if (this != &other)
 		{
-			if (verticesCount != 0) this->~BasicShape();
+			if (verticesCount != 0)
+				this->~BasicShape();
 
 			verticesCount = other.verticesCount;
 			shaderProgram = other.shaderProgram;
@@ -109,9 +113,10 @@ namespace Example
 		return *this;
 	}
 
-	void BasicShape::render(const glm::mat4& transform, const glm::mat4& camera) const
+	void BasicShape::render(const glm::mat4 &transform, const glm::mat4 &camera) const
 	{
-		if (verticesCount == 0) return;
+		if (verticesCount == 0)
+			return;
 
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);

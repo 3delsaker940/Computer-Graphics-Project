@@ -10,11 +10,11 @@ namespace Example
     GLuint TexturedShape::shaderProgram = 0;
     GLuint TexturedShape::cameraLoc = 0;
     GLuint TexturedShape::transformLoc = 0;
-    bool   TexturedShape::shaderReady = false;
+    bool TexturedShape::shaderReady = false;
 
     // ---------------- SHADER SOURCE ----------------
 
-    static const char* vertexSrc = R"(#version 330 core
+    static const char *vertexSrc = R"(#version 330 core
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aColor;
 layout (location = 2) in vec2 aUV;
@@ -31,7 +31,7 @@ void main()
 }
 )";
 
-    static const char* fragmentSrc = R"(#version 330 core
+    static const char *fragmentSrc = R"(#version 330 core
 in vec3 vColor;
 out vec4 FragColor;
 
@@ -43,7 +43,7 @@ void main()
 
     // ---------------- SHADER COMPILATION ----------------
 
-    static GLuint compile(GLenum type, const char* src)
+    static GLuint compile(GLenum type, const char *src)
     {
         GLuint s = glCreateShader(type);
         glShaderSource(s, 1, &src, nullptr);
@@ -55,7 +55,8 @@ void main()
         {
             char log[1024];
             glGetShaderInfoLog(s, 1024, nullptr, log);
-            std::cerr << "Shader compile error:\n" << log << std::endl;
+            std::cerr << "Shader compile error:\n"
+                      << log << std::endl;
             std::exit(-1);
         }
         return s;
@@ -77,7 +78,8 @@ void main()
         {
             char log[1024];
             glGetProgramInfoLog(shaderProgram, 1024, nullptr, log);
-            std::cerr << "Shader link error:\n" << log << std::endl;
+            std::cerr << "Shader link error:\n"
+                      << log << std::endl;
             std::exit(-1);
         }
 
@@ -94,7 +96,7 @@ void main()
 
     TexturedShape::TexturedShape() {}
 
-    TexturedShape::TexturedShape(const std::vector<TexturedVertex>& vertices)
+    TexturedShape::TexturedShape(const std::vector<TexturedVertex> &vertices)
     {
         if (!shaderReady)
             compileShader();
@@ -108,23 +110,23 @@ void main()
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
         glBufferData(GL_ARRAY_BUFFER,
-            vertices.size() * sizeof(TexturedVertex),
-            vertices.data(),
-            GL_STATIC_DRAW);
+                     vertices.size() * sizeof(TexturedVertex),
+                     vertices.data(),
+                     GL_STATIC_DRAW);
 
         // position
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-            sizeof(TexturedVertex), (void*)0);
+                              sizeof(TexturedVertex), (void *)0);
         glEnableVertexAttribArray(0);
 
         // color
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-            sizeof(TexturedVertex), (void*)offsetof(TexturedVertex, color));
+                              sizeof(TexturedVertex), (void *)offsetof(TexturedVertex, color));
         glEnableVertexAttribArray(1);
 
         // uv
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
-            sizeof(TexturedVertex), (void*)offsetof(TexturedVertex, uv));
+                              sizeof(TexturedVertex), (void *)offsetof(TexturedVertex, uv));
         glEnableVertexAttribArray(2);
 
         glBindVertexArray(0);
@@ -132,15 +134,17 @@ void main()
 
     // ---------------- MOVE ----------------
 
-    TexturedShape::TexturedShape(TexturedShape&& o) noexcept
+    TexturedShape::TexturedShape(TexturedShape &&o) noexcept
     {
         *this = std::move(o);
     }
 
-    TexturedShape& TexturedShape::operator=(TexturedShape&& o) noexcept
+    TexturedShape &TexturedShape::operator=(TexturedShape &&o) noexcept
     {
-        VAO = o.VAO; o.VAO = 0;
-        VBO = o.VBO; o.VBO = 0;
+        VAO = o.VAO;
+        o.VAO = 0;
+        VBO = o.VBO;
+        o.VBO = 0;
         vertexCount = o.vertexCount;
         return *this;
     }
@@ -149,21 +153,23 @@ void main()
 
     TexturedShape::~TexturedShape()
     {
-        if (VBO) glDeleteBuffers(1, &VBO);
-        if (VAO) glDeleteVertexArrays(1, &VAO);
+        if (VBO)
+            glDeleteBuffers(1, &VBO);
+        if (VAO)
+            glDeleteVertexArrays(1, &VAO);
     }
 
     // ---------------- RENDER ----------------
 
-    void TexturedShape::render(const glm::mat4& model,
-        const glm::mat4& camera) const
+    void TexturedShape::render(const glm::mat4 &model,
+                               const glm::mat4 &camera) const
     {
         glUseProgram(shaderProgram);
 
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE,
-            glm::value_ptr(model));
+                           glm::value_ptr(model));
         glUniformMatrix4fv(cameraLoc, 1, GL_FALSE,
-            glm::value_ptr(camera));
+                           glm::value_ptr(camera));
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, vertexCount);

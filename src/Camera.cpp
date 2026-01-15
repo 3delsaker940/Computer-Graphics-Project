@@ -3,7 +3,7 @@
 #include <glm/ext.hpp>
 #include <cmath>
 
-void Camera::handleInput(GLFWwindow* window, float dt)
+void Camera::handleInput(GLFWwindow *window, float dt)
 {
     const float rotSpeed = 1.5f;
     const float zoomSpeed = 2.0f;
@@ -23,7 +23,8 @@ void Camera::handleInput(GLFWwindow* window, float dt)
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
         distance -= zoomSpeed * dt;
 
-    if (distance < 0.5f) distance = 0.5f;
+    if (distance < 0.5f)
+        distance = 0.5f;
 }
 
 glm::mat4 Camera::getViewProjection() const
@@ -36,15 +37,13 @@ glm::mat4 Camera::getViewProjection() const
     glm::mat4 view = glm::lookAt(
         pos,
         target,
-        glm::vec3(0, 0, 1)
-    );
+        glm::vec3(0, 0, 1));
 
     glm::mat4 proj = glm::perspective(
         glm::radians(60.0f),
         aspect,
         0.1f,
-        100.0f
-    );
+        100.0f);
 
     return proj * view;
 }
