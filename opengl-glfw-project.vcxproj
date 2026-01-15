@@ -132,7 +132,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Car.cpp" />
     <ClCompile Include="dependencies\dependencies\glad\src\glad.c" />
+    <ClCompile Include="Lighting.cpp" />
     <ClCompile Include="Room.cpp" />
     <ClCompile Include="Showroom.cpp" />
     <ClCompile Include="src\basic-shape.cpp" />
@@ -144,9 +146,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.hpp" />
+    <ClInclude Include="Car.hpp" />
     <ClInclude Include="include\basic-shape.hpp" />
     <ClInclude Include="include\shader-utils.hpp" />
     <ClInclude Include="include\textured-shape.hpp" />
+    <ClInclude Include="Lighting.hpp" />
     <ClInclude Include="Room.hpp" />
     <ClInclude Include="Showroom.hpp" />
   </ItemGroup>

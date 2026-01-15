@@ -411,6 +411,26 @@ namespace Example
         rooms.push_back(std::make_unique<Room>());
         rooms.back()->create("Family", { -45, 0, 45 }, 15.0f, { 0.0f, 0.5f, 0.0f }, false);
 
+
+        // ═══════════════════════════════════════════════════════════
+// 10. إضافة السيارات ✅
+// ═══════════════════════════════════════════════════════════
+
+// سيارة في غرفة Luxury (المنصة الوسطى - index 1) - لون أحمر
+        rooms[0]->addCarToPodium(1, { 0.7f, 0.1f, 0.1f }, { 0.2f, 0.15f, 0.1f });
+
+        // سيارة في غرفة Electric (المنصة الوسطى) - لون أزرق
+        rooms[1]->addCarToPodium(1, { 0.1f, 0.3f, 0.7f }, { 0.1f, 0.1f, 0.15f });
+
+        // سيارة في غرفة Sports (المنصة الوسطى) - لون أصفر
+        rooms[2]->addCarToPodium(1, { 0.9f, 0.7f, 0.1f }, { 0.1f, 0.08f, 0.05f });
+
+        // سيارة في غرفة Family (المنصة الوسطى) - لون أبيض
+        rooms[3]->addCarToPodium(1, { 0.9f, 0.9f, 0.92f }, { 0.12f, 0.1f, 0.08f });
+
+        std::cout << "✅ Cars added to showroom!" << std::endl;
+        std::cout << "💡 Press E near a car to enter/exit" << std::endl;
+
         // ═══════════════════════════════════════════════════════════
         // 9. الشارع والرصيف
         // ═══════════════════════════════════════════════════════════
@@ -483,11 +503,101 @@ namespace Example
         streetLines = BasicShape(lineV);
 
         std::cout << "✅ Showroom initialized with exterior walls and windows!" << std::endl;
+
+        // ═══════════════════════════════════════════════════════════
+// 11. إعداد الإضاءة ✅
+// ═══════════════════════════════════════════════════════════
+
+// الإضاءة المحيطة
+        lighting.ambientColor = { 0.1f, 0.1f, 0.15f };
+        lighting.ambientIntensity = 0.25f;
+
+        // الإضاءة الاتجاهية (ضوء قادم من النوافذ)
+        lighting.directionalLight = DirectionalLight(
+            { 0.2f, -0.8f, 0.3f },      // الاتجاه
+            { 1.0f, 0.95f, 0.85f },     // لون دافئ
+            0.3f                       // شدة معتدلة
+        );
+
+        // ─────────────────────────────────────────────────────────
+        // مصابيح السقف الرئيسية (Point Lights)
+        // ─────────────────────────────────────────────────────────
+
+        // مصابيح في وسط المعرض
+        lighting.addPointLight(PointLight({ 0, 14, 0 }, { 1.0f, 1.0f, 0.95f }, 1.5f, 40.0f));
+        lighting.addPointLight(PointLight({ 25, 14, 25 }, { 1.0f, 1.0f, 0.95f }, 1.0f, 30.0f));
+        lighting.addPointLight(PointLight({ -25, 14, 25 }, { 1.0f, 1.0f, 0.95f }, 1.0f, 30.0f));
+        lighting.addPointLight(PointLight({ 25, 14, -25 }, { 1.0f, 1.0f, 0.95f }, 1.0f, 30.0f));
+        lighting.addPointLight(PointLight({ -25, 14, -25 }, { 1.0f, 1.0f, 0.95f }, 1.0f, 30.0f));
+
+        // ─────────────────────────────────────────────────────────
+        // مصابيح الغرف (ألوان مختلفة لكل غرفة)
+        // ─────────────────────────────────────────────────────────
+
+        // Luxury Room (45, -45) - إضاءة ذهبية دافئة
+        lighting.addPointLight(PointLight({ 45, 6.5f, -45 }, { 1.0f, 0.9f, 0.7f }, 1.2f, 25.0f));
+
+        // Electric Room (-45, -45) - إضاءة زرقاء
+        lighting.addPointLight(PointLight({ -45, 6.5f, -45 }, { 0.5f, 0.7f, 1.0f }, 1.2f, 25.0f));
+
+        // Sports Room (45, 45) - إضاءة حمراء
+        lighting.addPointLight(PointLight({ 45, 6.5f, 45 }, { 1.0f, 0.6f, 0.5f }, 1.2f, 25.0f));
+
+        // Family Room (-45, 45) - إضاءة خضراء طبيعية
+        lighting.addPointLight(PointLight({ -45, 6.5f, 45 }, { 0.8f, 1.0f, 0.7f }, 1.2f, 25.0f));
+
+        // ─────────────────────────────────────────────────────────
+        // Spot Lights على السيارات
+        // ─────────────────────────────────────────────────────────
+
+        // Luxury Car
+        lighting.addSpotLight(SpotLight(
+            { 45, 6.0f, -50.25f },      // موقع فوق السيارة
+            { 0, -1, 0 },               // يشير للأسفل
+            { 1.0f, 0.95f, 0.8f },      // لون دافئ
+            2.0f,                      // شدة
+            30.0f, 45.0f              // زوايا القطع
+        ));
+
+        // Electric Car
+        lighting.addSpotLight(SpotLight(
+            { -45, 6.0f, -50.25f },
+            { 0, -1, 0 },
+            { 0.6f, 0.8f, 1.0f },       // لون أزرق
+            2.0f,
+            30.0f, 45.0f
+        ));
+
+        // Sports Car
+        lighting.addSpotLight(SpotLight(
+            { 45, 6.0f, 39.75f },
+            { 0, -1, 0 },
+            { 1.0f, 0.9f, 0.8f },
+            2.0f,
+            30.0f, 45.0f
+        ));
+
+        // Family Car
+        lighting.addSpotLight(SpotLight(
+            { -45, 6.0f, 39.75f },
+            { 0, -1, 0 },
+            { 0.9f, 1.0f, 0.85f },      // لون طبيعي
+            2.0f,
+            30.0f, 45.0f
+        ));
+
+        std::cout << "✅ Lighting system initialized!" << std::endl;
+        std::cout << "   Point Lights: " << lighting.pointLights.size() << std::endl;
+        std::cout << "   Spot Lights: " << lighting.spotLights.size() << std::endl;
+        std::cout << "   Press L to toggle lights" << std::endl;
     }
 
     void Showroom::renderAll(const glm::mat4& viewProj)
     {
-        // رسم العناصر الصلبة أولاً
+        // ✅ تطبيق الإضاءة على الشيدر
+        lighting.applyToShader(BasicShape::getShaderProgram());
+
+        // رسم العناصر الصلبة
         outerGround.render(glm::mat4(1.0f), viewProj);
         ceiling.render(glm::mat4(1.0f), viewProj);
         exteriorWalls.render(glm::mat4(1.0f), viewProj);
@@ -501,8 +611,14 @@ namespace Example
         for (auto& r : rooms)
             r->draw(viewProj);
 
-        // ✅ رسم الزجاج الشفاف أخيراً
-        windowGlass.render(glm::mat4(1.0f), viewProj, 0.3f);  // شفافية 30%
+        // الزجاج الشفاف أخيراً
+        windowGlass.render(glm::mat4(1.0f), viewProj, 0.3f);
+    }
+
+    void Showroom::toggleLights()
+    {
+        lighting.toggleAllLights();
+        std::cout << "💡 Lights toggled!" << std::endl;
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -704,5 +820,18 @@ namespace Example
         }
 
         return nextPos;
+    }
+
+    Car* Showroom::findNearestCar(glm::vec3 playerPos)
+    {
+        for (auto& room : rooms)
+        {
+            Car* car = room->getCarNearPlayer(playerPos);
+            if (car != nullptr)
+            {
+                return car;
+            }
+        }
+        return nullptr;
     }
 }

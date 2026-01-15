@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "Room.hpp"
+#include "Car.hpp"
+#include "Lighting.hpp"  // ✅ جديد
 #include <vector>
 #include <memory>
 
@@ -11,13 +13,12 @@ namespace Example
         float halfSize;
     };
 
-    // ✅ جديد: حدود الجدار الخارجي
     struct ExteriorWallBounds
     {
         float minX, maxX;
         float minZ, maxZ;
-        float doorMinX, doorMaxX;  // حدود الباب الرئيسي
-        float doorZ;               // موقع Z للباب
+        float doorMinX, doorMaxX;
+        float doorZ;
     };
 
     class Showroom
@@ -35,17 +36,23 @@ namespace Example
 
         std::vector<ColumnBounds> columnBounds;
 
-        // ✅ جديد: الجدران الخارجية والنوافذ
-        Example::BasicShape exteriorWalls;      // الجدران الخارجية
-        Example::BasicShape windowFrames;       // إطارات النوافذ
-        Example::BasicShape windowGlass;        // زجاج النوافذ (شفاف)
-        Example::BasicShape mainDoorFrame;      // إطار الباب الرئيسي
+        Example::BasicShape exteriorWalls;
+        Example::BasicShape windowFrames;
+        Example::BasicShape windowGlass;
+        Example::BasicShape mainDoorFrame;
 
-        ExteriorWallBounds exteriorBounds;      // حدود التصادم
+        ExteriorWallBounds exteriorBounds;
 
     public:
+        // ✅ جديد: مدير الإضاءة (public للوصول إليه)
+        LightingManager lighting;
+
         void init();
         void renderAll(const glm::mat4& viewProj);
         glm::vec3 checkCollision(glm::vec3 currentPos, glm::vec3 nextPos);
+        Car* findNearestCar(glm::vec3 playerPos);
+
+        // ✅ جديد: تبديل الإضاءة
+        void toggleLights();
     };
 }

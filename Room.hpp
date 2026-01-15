@@ -1,12 +1,13 @@
 ﻿#pragma once
 #include <vector>
 #include <string>
+#include <memory>
 #include <glm/glm.hpp>
 #include "basic-shape.hpp"
+#include "Car.hpp"  // ✅ إضافة
 
 namespace Example
 {
-    // ✅ هيكل لتخزين حدود المنصة للتصادم
     struct PodiumBounds
     {
         float xCenter, zCenter;
@@ -19,15 +20,17 @@ namespace Example
         std::string name;
         Example::BasicShape floor;
         Example::BasicShape walls;
-        std::vector<Example::BasicShape> podiums;  // ✅ 3 منصات بدلاً من واحدة
+        std::vector<Example::BasicShape> podiums;
         Example::BasicShape ceilingLight;
 
         glm::vec3 centerOffset;
         float size;
         bool doorAtMaxZ;
 
-        // ✅ حدود المنصات للتصادم
         std::vector<PodiumBounds> podiumBounds;
+
+        // ✅ جديد: السيارات في الغرفة
+        std::vector<std::unique_ptr<Car>> cars;
 
         Room() : size(0), centerOffset(0.0f), doorAtMaxZ(true) {}
 
@@ -38,5 +41,11 @@ namespace Example
 
         void create(std::string name, glm::vec3 position, float size, glm::vec3 color, bool isDoorAtMaxZ);
         void draw(const glm::mat4& viewProjMatrix);
+
+        // ✅ جديد: إضافة سيارة على منصة معينة
+        void addCarToPodium(int podiumIndex, glm::vec3 carColor, glm::vec3 interiorColor = { 0.15f, 0.12f, 0.1f });
+
+        // ✅ جديد: فحص إذا كان اللاعب قرب باب سيارة
+        Car* getCarNearPlayer(glm::vec3 playerPos);
     };
 }
