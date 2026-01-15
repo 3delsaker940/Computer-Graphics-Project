@@ -42,6 +42,12 @@
     <ClCompile Include="Room.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="street.hpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="street.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\basic-shape.hpp">

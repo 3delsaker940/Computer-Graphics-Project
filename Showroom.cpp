@@ -61,6 +61,40 @@ namespace Example {
         rooms.back()->create("Sports", { 45, 0, 45 }, 15.0f, { 0.6f, 0.0f, 0.0f }, false);
         rooms.push_back(std::make_unique<Room>());
         rooms.back()->create("Family", { -45, 0, 45 }, 15.0f, { 0.0f, 0.5f, 0.0f }, false);
+
+        std::vector<BasicVertex> roadV;
+        glm::vec3 asphaltCol = { 0.15f, 0.15f, 0.15f }; // لون رمادي غامق (زفت)
+        float roadW = 8.0f;  // نصف عرض الطريق
+        float roadL = 100.0f; // طول الطريق
+
+        roadV.push_back({ {-roadW, 0.01f, -roadL}, asphaltCol }); roadV.push_back({ {roadW, 0.01f, -roadL}, asphaltCol });
+        roadV.push_back({ {roadW, 0.01f,  roadL}, asphaltCol }); roadV.push_back({ {-roadW, 0.01f, -roadL}, asphaltCol });
+        roadV.push_back({ {roadW, 0.01f,  roadL}, asphaltCol }); roadV.push_back({ {-roadW, 0.01f,  roadL}, asphaltCol });
+        streetAsphalt = BasicShape(roadV);
+
+        std::vector<BasicVertex> sideV;
+        glm::vec3 sideCol = { 0.8f, 0.8f, 0.8f }; // لون أبيض رمادي
+        float sW = 2.0f;
+
+        auto addSidewalk = [&](float xPos) {
+            sideV.push_back({ {xPos - sW, 0.02f, -roadL}, sideCol }); sideV.push_back({ {xPos + sW, 0.02f, -roadL}, sideCol });
+            sideV.push_back({ {xPos + sW, 0.02f,  roadL}, sideCol }); sideV.push_back({ {xPos - sW, 0.02f, -roadL}, sideCol });
+            sideV.push_back({ {xPos + sW, 0.02f,  roadL}, sideCol }); sideV.push_back({ {xPos - sW, 0.02f,  roadL}, sideCol });
+            };
+        addSidewalk(roadW + sW);  // رصيف يمين
+        addSidewalk(-(roadW + sW)); // رصيف يسار
+        sidewalk = BasicShape(sideV);
+
+        std::vector<BasicVertex> lineV;
+        glm::vec3 lineCol = { 1.0f, 1.0f, 1.0f }; // أبيض ناصع
+        for (float z = -roadL; z < roadL; z += 10.0f) {
+            float lW = 0.15f; // عرض الخط
+            float lL = 4.0f;  // طول الخط
+            lineV.push_back({ {-lW, 0.03f, z}, lineCol }); lineV.push_back({ {lW, 0.03f, z}, lineCol });
+            lineV.push_back({ {lW, 0.03f, z + lL}, lineCol }); lineV.push_back({ {-lW, 0.03f, z}, lineCol });
+            lineV.push_back({ {lW, 0.03f, z + lL}, lineCol }); lineV.push_back({ {-lW, 0.03f, z + lL}, lineCol });
+        }
+        streetLines = BasicShape(lineV);
     }
 
     // لا تنسى تحديث renderAll لرسم المكتب
@@ -69,6 +103,10 @@ namespace Example {
         ceiling.render(glm::mat4(1.0f), viewProj);     // رسم السقف
         columns.render(glm::mat4(1.0f), viewProj);     // رسم الأعمدة
         receptionDesk.render(glm::mat4(1.0f), viewProj);
+
+        streetAsphalt.render(glm::mat4(1.0f), viewProj); // رسم الزفت
+        sidewalk.render(glm::mat4(1.0f), viewProj);      // رسم الرصيف
+        streetLines.render(glm::mat4(1.0f), viewProj);
 
         for (auto& r : rooms) r->draw(viewProj);
     }

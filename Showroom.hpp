@@ -12,6 +12,9 @@ namespace Example {
         Example::BasicShape receptionDesk;
         Example::BasicShape columns;       // الأعمدة
 
+        Example::BasicShape streetAsphalt; // الزفت
+        Example::BasicShape sidewalk;      // الرصيف
+        Example::BasicShape streetLines;
     public:
         void init();
         void renderAll(const glm::mat4& viewProj);

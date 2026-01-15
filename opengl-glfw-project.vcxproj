@@ -139,6 +139,8 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\shader-utils.cpp" />
     <ClCompile Include="src\textured-shape.cpp" />
+    <ClCompile Include="street.cpp" />
+    <ClCompile Include="street.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.hpp" />
