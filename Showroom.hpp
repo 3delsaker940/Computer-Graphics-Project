@@ -42,6 +42,10 @@ namespace Example
         Example::BasicShape mainDoorFrame;      // إطار الباب الرئيسي
 
         ExteriorWallBounds exteriorBounds;      // حدود التصادم
+        BasicShape streetLamps;      // أعمدة الإنارة
+
+        //مشان الدوار
+        Example::BasicShape roundabout;
 
     public:
         void init();
