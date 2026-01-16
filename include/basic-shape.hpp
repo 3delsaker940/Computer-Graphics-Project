@@ -1,50 +1,83 @@
 ﻿#pragma once
 
-// ---- تضمين المكاتب الخارجية ---- //
-
-// من أجل استخدام اصدار حديث من الأوبن جي ال
-// لا بد من استخدام مكتبة وسيطة
-// GLAD: https://github.com/Dav1dde/glad, https://glad.dav1d.de/
-// المرجع: https://docs.gl/ أو https://devdocs.io/
+#include <vector>
 #include <glad/glad.h>
-
-// للتعامل مع الأشعة والمصفوفات الرياضية
-// وانشاء مصفوفات تحويلات هندسية وإسقاط
-// GLM: OpenGL Mathematics: https://github.com/g-truc/glm/
-// دليل المستخدم: https://github.com/g-truc/glm/blob/master/manual.md
-// لربما من الأحسن الإعتماد على التتمة التلقائية أثناء الكتابة،
-// أو قراءة ملفات التوريس مباشرة.
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
 namespace Example
 {
-	struct BasicVertex
-	{
-		glm::vec3 position;
-		glm::vec3 color;
-	};
+    // ✅ تعديل: إضافة Normal للـ Vertex
+    struct BasicVertex
+    {
+        glm::vec3 position;
+        glm::vec3 color;
+        glm::vec3 normal;  // ✅ جديد
 
-	class BasicShape
-	{
-	protected:
-		int verticesCount = 0;
+        BasicVertex() : position(0), color(0), normal(0, 1, 0) {}
 
-		GLuint cameraLocation = 0, transformLocation = 0;
-		GLuint VAO = 0, VBO = 0;
+        BasicVertex(glm::vec3 pos, glm::vec3 col, glm::vec3 norm = { 0, 1, 0 })
+            : position(pos), color(col), normal(norm) {
+        }
+    };
 
-		GLenum drawMode = GL_TRIANGLES;
+    class BasicShape
+    {
+    protected:
+        int verticesCount = 0;
 
-	public:
-		static GLuint shaderProgram;
-		static void compileShapeShader();
+        GLuint cameraLocation = 0, transformLocation = 0;
+        GLuint alphaLocation = 0;
+        GLuint VAO = 0, VBO = 0;
 
-		BasicShape();
-		BasicShape(const std::vector<BasicVertex>& vertices, GLenum drawMode = GL_TRIANGLES);
-		~BasicShape();
+        GLenum drawMode = GL_TRIANGLES;
 
-		BasicShape& operator=(BasicShape&& other) noexcept;
+    public:
+        static GLuint shaderProgram;
+        static void compileShapeShader();
 
-		void render(const glm::mat4& transform = { 1.0f }, const glm::mat4& camera = { 1.0f }) const;
-	};
+        BasicShape();
+        BasicShape(const std::vector<BasicVertex>& vertices, GLenum drawMode = GL_TRIANGLES);
+        ~BasicShape();
+
+        BasicShape(BasicShape&& other) noexcept;
+        BasicShape& operator=(BasicShape&& other) noexcept;
+
+        BasicShape(const BasicShape&) = delete;
+        BasicShape& operator=(const BasicShape&) = delete;
+
+        void render(const glm::mat4& transform = glm::mat4(1.0f),
+            const glm::mat4& camera = glm::mat4(1.0f),
+            float alpha = 1.0f) const;
+
+        // ✅ جديد: الحصول على الشيدر
+        static GLuint getShaderProgram() { return shaderProgram; }
+    };
+
+    // ═══════════════════════════════════════════════════════════
+    // دوال مساعدة لحساب Normals
+    // ═══════════════════════════════════════════════════════════
+
+    // حساب Normal لمثلث
+    inline glm::vec3 calculateNormal(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3)
+    {
+        glm::vec3 edge1 = p2 - p1;
+        glm::vec3 edge2 = p3 - p1;
+        return glm::normalize(glm::cross(edge1, edge2));
+    }
+
+    // إضافة مربع مع Normal صحيح
+    inline void addQuadWithNormal(std::vector<BasicVertex>& verts,
+        glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4,
+        glm::vec3 color)
+    {
+        glm::vec3 normal = calculateNormal(p1, p2, p3);
+
+        verts.push_back({ p1, color, normal });
+        verts.push_back({ p2, color, normal });
+        verts.push_back({ p3, color, normal });
+        verts.push_back({ p1, color, normal });
+        verts.push_back({ p3, color, normal });
+        verts.push_back({ p4, color, normal });
+    }
 }
