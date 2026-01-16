@@ -23,6 +23,10 @@ namespace Example
         std::vector<Example::BasicShape> podiums;
         Example::BasicShape ceilingLight;
 
+    
+        float doorWidth = 5.0f;   // ✅ عرض فتحة الباب
+        float doorHeight = 4.5f;  // ✅ ارتفاع فتحة الباب (نفس اللي عندك)
+
         glm::vec3 centerOffset;
         float size;
         bool doorAtMaxZ;
@@ -47,5 +51,16 @@ namespace Example
 
         // ✅ جديد: فحص إذا كان اللاعب قرب باب سيارة
         Car* getCarNearPlayer(glm::vec3 playerPos);
+
+        // --- Door animation ---
+        bool doorOpen = true;          // خليها true حتى ما تمنعك من الدخول الآن (تقدر تجعلها false لاحقاً)
+        float doorAngle = 0.0f;        // زاوية الباب الحالية بالدرجات
+        float doorTargetAngle = 0.0f;  // الهدف (0 أو ±90)
+        Example::BasicShape doorPanel; // شكل الباب نفسه (لوح)
+
+        void update(float dt);
+        void toggleDoor();
+        bool isNearDoor(const glm::vec3& playerPos) const;
+        bool isDoorOpen() const { return doorOpen; }
     };
 }

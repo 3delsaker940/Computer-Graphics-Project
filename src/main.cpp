@@ -79,23 +79,56 @@ public:
                 enterCar(nearbyCar);
             }
             eKeyWasPressed = ePressed;
+
+            static bool fKeyWasPressed = false;
+            bool fPressed = glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS;
+            if (fPressed && !fKeyWasPressed)
+            {
+                showroom.toggleNearestRoomDoor(appCamera.Position);
+            }
+            fKeyWasPressed = fPressed;
         }
         else
         {
-            // ─────────────────────────────────────────
-            // وضع الجلوس في السيارة
-            // ─────────────────────────────────────────
+            if (!currentCar)
+            {
+                isInCar = false;
+                return;
+            }
 
-            // تحديث موقع الكاميرا لتبقى في مقعد السائق
-            appCamera.Position = currentCar->getDriverSeatPosition();
-
-            // فحص الضغط على E للخروج
+            // E للخروج (إذا خرجت لا تكمل نفس الفريم)
             bool ePressed = glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS;
             if (ePressed && !eKeyWasPressed)
             {
                 exitCar();
+                eKeyWasPressed = ePressed;
+                return; // ✅ مهم جداً لمنع استدعاء setThrottle بعد currentCar=nullptr
             }
             eKeyWasPressed = ePressed;
+
+            // W/S للقيادة
+            float tInput = 0.0f;
+            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) tInput += 1.0f;
+            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) tInput -= 1.0f;
+
+            currentCar->setThrottle(tInput);
+
+            float sInput = 0.0f;
+            if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) sInput -= 1.0f;
+            if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) sInput += 1.0f;
+
+            currentCar->setSteer(sInput);
+
+            // بعد تحديث السيارة (showroom.update) سنثبت الكاميرا بالمقعد
+        }
+
+
+        // تحديث تحريك الأبواب
+        showroom.update(dt);
+
+        if (isInCar && currentCar)
+        {
+            appCamera.Position = currentCar->getDriverSeatPosition();
         }
 
         // ESC للخروج
@@ -162,12 +195,15 @@ private:
 
     void enterCar(Example::Car* car)
     {
+        /*car->setDriverDoorOpen(true);*/
+
         if (!car) return;
 
         std::cout << "🚗 Entering car..." << std::endl;
 
-        isInCar = true;
         currentCar = car;
+        isInCar = true;
+        currentCar->setDriverDoorOpen(true);
 
         // حفظ الموقع الحالي للعودة إليه لاحقاً
         savedPosition = appCamera.Position;
@@ -192,13 +228,20 @@ private:
 
         std::cout << "🚶 Exiting car..." << std::endl;
 
-        isInCar = false;
+        
 
         // العودة للموقع المحفوظ
         appCamera.Position = savedPosition;
         appCamera.Yaw = savedYaw;
         appCamera.Pitch = savedPitch;
 
+        if (currentCar)
+        {
+            currentCar->setThrottle(0.0f);
+            currentCar->setDriverDoorOpen(false);
+        }
+
+        isInCar = false;
         currentCar = nullptr;
 
         std::cout << "✅ Exited car!" << std::endl;

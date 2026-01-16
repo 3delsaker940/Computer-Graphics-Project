@@ -1200,7 +1200,7 @@ namespace Example
 
             if (nextPos.x > xMin && nextPos.x < xMax)
             {
-                bool outsideDoorWidth = (nextPos.x < dL || nextPos.x > dR);
+                bool outsideDoorWidth = (nextPos.x < dL || nextPos.x > dR) || !room->isDoorOpen();
                 if (outsideDoorWidth)
                 {
                     if (room->doorAtMaxZ)
@@ -1250,6 +1250,137 @@ namespace Example
         return nextPos;
     }
 
+    glm::vec3 Showroom::checkCollisionRadius(glm::vec3 currentPos, glm::vec3 nextPos, float radius)
+    {
+        float margin = radius;
+        float podiumMargin = radius;
+        float columnMargin = radius;
+
+        // 1) الجدران الخارجية (Clamp)
+        float extMinX = exteriorBounds.minX;
+        float extMaxX = exteriorBounds.maxX;
+        float extMinZ = exteriorBounds.minZ;
+        float extMaxZ = exteriorBounds.maxZ;
+        float doorLeft = exteriorBounds.doorMinX;
+        float doorRight = exteriorBounds.doorMaxX;
+        float doorZ = exteriorBounds.doorZ;
+
+        // X walls
+        nextPos.x = std::max(extMinX + margin, std::min(nextPos.x, extMaxX - margin));
+        // Z back wall
+        nextPos.z = std::max(extMinZ + margin, nextPos.z);
+
+        // Z front wall with main door opening
+        bool outsideMainDoor = (nextPos.x < doorLeft + margin || nextPos.x > doorRight - margin);
+        if (outsideMainDoor)
+        {
+            // امنع تجاوز الجدار الأمامي
+            nextPos.z = std::min(extMaxZ - margin, nextPos.z);
+        }
+
+        // 2) الأعمدة
+        for (const auto& col : columnBounds)
+        {
+            float colXMin = col.xCenter - col.halfSize;
+            float colXMax = col.xCenter + col.halfSize;
+            float colZMin = col.zCenter - col.halfSize;
+            float colZMax = col.zCenter + col.halfSize;
+
+            bool insideX = nextPos.x > colXMin - columnMargin && nextPos.x < colXMax + columnMargin;
+            bool insideZ = nextPos.z > colZMin - columnMargin && nextPos.z < colZMax + columnMargin;
+
+            if (insideX && insideZ)
+            {
+                float distLeft = std::abs(nextPos.x - (colXMin - columnMargin));
+                float distRight = std::abs(nextPos.x - (colXMax + columnMargin));
+                float distFront = std::abs(nextPos.z - (colZMax + columnMargin));
+                float distBack = std::abs(nextPos.z - (colZMin - columnMargin));
+
+                float minDist = std::min({ distLeft, distRight, distFront, distBack });
+
+                if (minDist == distLeft)       nextPos.x = colXMin - columnMargin;
+                else if (minDist == distRight) nextPos.x = colXMax + columnMargin;
+                else if (minDist == distFront) nextPos.z = colZMax + columnMargin;
+                else                           nextPos.z = colZMin - columnMargin;
+            }
+        }
+
+        // 3) الغرف + منصاتها
+        for (auto& room : rooms)
+        {
+            float xMin = room->centerOffset.x - room->size;
+            float xMax = room->centerOffset.x + room->size;
+            float zMin = room->centerOffset.z - room->size;
+            float zMax = room->centerOffset.z + room->size;
+
+            // تعامل بسيط: إذا داخل نطاق الغرفة تقريباً، امنع الخروج إلا من الباب إذا مفتوح
+            bool nearRoom =
+                nextPos.x > xMin - margin && nextPos.x < xMax + margin &&
+                nextPos.z > zMin - margin && nextPos.z < zMax + margin;
+
+            if (nearRoom)
+            {
+                // جدران x
+                nextPos.x = std::max(xMin + margin, std::min(nextPos.x, xMax - margin));
+
+                float doorHalfWidth = 2.5f;
+                float dL = room->centerOffset.x - doorHalfWidth;
+                float dR = room->centerOffset.x + doorHalfWidth;
+
+                // جدار مصمت
+                if (room->doorAtMaxZ)
+                {
+                    // الخلف مصمت
+                    nextPos.z = std::max(zMin + margin, nextPos.z);
+
+                    // الأمام عند zMax: يسمح فقط إذا الباب مفتوح وداخل عرض الباب
+                    bool doorAllowed = room->isDoorOpen() && (nextPos.x >= dL + margin && nextPos.x <= dR - margin);
+                    if (!doorAllowed)
+                        nextPos.z = std::min(zMax - margin, nextPos.z);
+                }
+                else
+                {
+                    // الأمام مصمت
+                    nextPos.z = std::min(zMax - margin, nextPos.z);
+
+                    // الخلف عند zMin: يسمح فقط إذا الباب مفتوح وداخل عرض الباب
+                    bool doorAllowed = room->isDoorOpen() && (nextPos.x >= dL + margin && nextPos.x <= dR - margin);
+                    if (!doorAllowed)
+                        nextPos.z = std::max(zMin + margin, nextPos.z);
+                }
+
+                // منصات الغرفة
+                for (const auto& podium : room->podiumBounds)
+                {
+                    float pXMin = podium.xCenter - podium.halfWidth;
+                    float pXMax = podium.xCenter + podium.halfWidth;
+                    float pZMin = podium.zCenter - podium.halfDepth;
+                    float pZMax = podium.zCenter + podium.halfDepth;
+
+                    bool insidePX = nextPos.x > pXMin - podiumMargin && nextPos.x < pXMax + podiumMargin;
+                    bool insidePZ = nextPos.z > pZMin - podiumMargin && nextPos.z < pZMax + podiumMargin;
+
+                    if (insidePX && insidePZ)
+                    {
+                        float distLeft = std::abs(nextPos.x - (pXMin - podiumMargin));
+                        float distRight = std::abs(nextPos.x - (pXMax + podiumMargin));
+                        float distFront = std::abs(nextPos.z - (pZMax + podiumMargin));
+                        float distBack = std::abs(nextPos.z - (pZMin - podiumMargin));
+
+                        float minDist = std::min({ distLeft, distRight, distFront, distBack });
+
+                        if (minDist == distLeft)       nextPos.x = pXMin - podiumMargin;
+                        else if (minDist == distRight) nextPos.x = pXMax + podiumMargin;
+                        else if (minDist == distFront) nextPos.z = pZMax + podiumMargin;
+                        else                           nextPos.z = pZMin - podiumMargin;
+                    }
+                }
+            }
+        }
+
+        return nextPos;
+    }
+
     Car* Showroom::findNearestCar(glm::vec3 playerPos)
     {
         for (auto& room : rooms)
@@ -1261,5 +1392,104 @@ namespace Example
             }
         }
         return nullptr;
+    }
+
+    void Showroom::update(float dt)
+    {
+        // تحديث أبواب الغرف
+        for (auto& r : rooms)
+            r->update(dt);
+
+        // تحديث السيارات + تصادم مع الجدران/الأعمدة فقط
+        const float carRadius = 1.2f;
+
+        for (auto& r : rooms)
+        {
+            for (auto& carPtr : r->cars)
+            {
+                Car* car = carPtr.get();
+                if (!car) continue;
+
+                glm::vec3 oldPos = car->getPosition();
+                car->update(dt);
+                glm::vec3 newPos = car->getPosition();
+
+                // ✅ استخدم تصادم اللاعب نفسه مؤقتاً لكن بدون منصات؟
+                // أسهل حل الآن: نمنع السيارة من الخروج من حدود المعرض + أعمدة فقط
+                // (لا نستخدم podium collision)
+
+                glm::vec3 fixed = newPos;
+
+                // 1) حدود المعرض الخارجية
+                float m = carRadius;
+                fixed.x = std::max(exteriorBounds.minX + m, std::min(fixed.x, exteriorBounds.maxX - m));
+                fixed.z = std::max(exteriorBounds.minZ + m, std::min(fixed.z, exteriorBounds.maxZ - m));
+
+                // 2) الأعمدة
+                float columnMargin = carRadius;
+                for (const auto& col : columnBounds)
+                {
+                    float colXMin = col.xCenter - col.halfSize;
+                    float colXMax = col.xCenter + col.halfSize;
+                    float colZMin = col.zCenter - col.halfSize;
+                    float colZMax = col.zCenter + col.halfSize;
+
+                    bool insideX = fixed.x > colXMin - columnMargin && fixed.x < colXMax + columnMargin;
+                    bool insideZ = fixed.z > colZMin - columnMargin && fixed.z < colZMax + columnMargin;
+
+                    if (insideX && insideZ)
+                    {
+                        float distLeft = std::abs(fixed.x - (colXMin - columnMargin));
+                        float distRight = std::abs(fixed.x - (colXMax + columnMargin));
+                        float distFront = std::abs(fixed.z - (colZMax + columnMargin));
+                        float distBack = std::abs(fixed.z - (colZMin - columnMargin));
+
+                        float minDist = std::min({ distLeft, distRight, distFront, distBack });
+
+                        if (minDist == distLeft) fixed.x = colXMin - columnMargin;
+                        else if (minDist == distRight) fixed.x = colXMax + columnMargin;
+                        else if (minDist == distFront) fixed.z = colZMax + columnMargin;
+                        else fixed.z = colZMin - columnMargin;
+                    }
+                }
+
+                // إذا صار تصحيح => أوقفها حتى لا تهز
+                if (fixed.x != newPos.x || fixed.z != newPos.z)
+                {
+                    car->setPosition({ fixed.x, newPos.y, fixed.z });
+                    car->stopMovement();
+                }
+            }
+        }
+    }
+
+    bool Showroom::toggleNearestRoomDoor(const glm::vec3& playerPos)
+    {
+        Room* best = nullptr;
+        float bestDist = 1e9f;
+
+        for (auto& r : rooms)
+        {
+            float doorZLocal = r->doorAtMaxZ ? r->size : -r->size;
+            glm::vec3 doorCenter = r->centerOffset + glm::vec3(0.0f, 0.0f, doorZLocal);
+
+            float dx = playerPos.x - doorCenter.x;
+            float dz = playerPos.z - doorCenter.z;
+            float dist = std::sqrt(dx * dx + dz * dz);
+
+            if (dist < bestDist)
+            {
+                bestDist = dist;
+                best = r.get();
+            }
+        }
+
+        // مسافة تفعيل معقولة
+        if (best && bestDist < 8.0f)
+        {
+            best->toggleDoor();
+            return true;
+        }
+        return false;
     }
 }

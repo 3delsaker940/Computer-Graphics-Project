@@ -60,5 +60,10 @@ namespace Example
 
         // ✅ جديد: تبديل الإضاءة
         void toggleLights();
+
+        void update(float dt);
+        bool toggleNearestRoomDoor(const glm::vec3& playerPos);
+
+        glm::vec3 checkCollisionRadius(glm::vec3 currentPos, glm::vec3 nextPos, float radius);
     };
 }

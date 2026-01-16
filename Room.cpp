@@ -11,7 +11,8 @@ namespace Example
         this->doorAtMaxZ = isDoorAtMaxZ;
 
         float h = 7.0f;
-        float doorWidth = 5.0f;
+        this->doorWidth = 5.0f;    // أو اتركها كما في Room.hpp ولا تكتبها هنا
+        this->doorHeight = 4.5f;;
         std::vector<BasicVertex> floorV, wallV, lightV;
         auto addPos = [&](glm::vec3 p) { return p + centerOffset; };
 
@@ -180,23 +181,51 @@ namespace Example
 
         // الجزء الأيسر من الباب
         addQuadWithNormal(wallV,
-            addPos({ -size, 0, doorZ }), addPos({ -doorWidth / 2, 0, doorZ }),
-            addPos({ -doorWidth / 2, h, doorZ }), addPos({ -size, h, doorZ }),
+            addPos({ -size, 0, doorZ }), addPos({ -this->doorWidth / 2, 0, doorZ }),
+            addPos({ -this->doorWidth / 2, h, doorZ }), addPos({ -size, h, doorZ }),
             color);
 
         // الجزء الأيمن من الباب
         addQuadWithNormal(wallV,
-            addPos({ doorWidth / 2, 0, doorZ }), addPos({ size, 0, doorZ }),
-            addPos({ size, h, doorZ }), addPos({ doorWidth / 2, h, doorZ }),
+            addPos({ this->doorWidth / 2, 0, doorZ }), addPos({ size, 0, doorZ }),
+            addPos({ size, h, doorZ }), addPos({ this->doorWidth / 2, h, doorZ }),
             color);
 
         // الجزء العلوي فوق الباب
         addQuadWithNormal(wallV,
-            addPos({ -doorWidth / 2, 4.5f, doorZ }), addPos({ doorWidth / 2, 4.5f, doorZ }),
-            addPos({ doorWidth / 2, h, doorZ }), addPos({ -doorWidth / 2, h, doorZ }),
+            addPos({ -this->doorWidth / 2, 4.5f, doorZ }), addPos({ this->doorWidth / 2, 4.5f, doorZ }),
+            addPos({ this->doorWidth / 2, h, doorZ }), addPos({ -this->doorWidth / 2, h, doorZ }),
             color);
 
         walls = BasicShape(wallV);
+
+        // =====================
+// Door panel geometry
+// =====================
+        float doorHeight = 4.5f; // مثل فتحة الباب عندك
+        glm::vec3 doorColor = color * 0.85f;
+
+        // الباب عند z = doorZ (محلياً ضمن الغرفة)
+        // سنبني الباب في نظام إحداثيات محلي حول المفصلة: x من 0..this->doorWidth و z=0
+        // ثم سنضعه في العالم عبر مصفوفة Transform أثناء الرسم.
+        std::vector<BasicVertex> doorV;
+
+        glm::vec3 nDoor = { 0, 0, 1 }; // Normal افتراضي (لن ندقق بالإضاءة هنا)
+
+        // مستطيل الباب (لوح واحد) - متموضع عند المفصلة (0)
+        doorV.push_back({ {0.0f,       0.0f,      0.0f}, doorColor, nDoor });
+        doorV.push_back({ {this->doorWidth,  0.0f,      0.0f}, doorColor, nDoor });
+        doorV.push_back({ {this->doorWidth,  doorHeight,0.0f}, doorColor, nDoor });
+        doorV.push_back({ {0.0f,       0.0f,      0.0f}, doorColor, nDoor });
+        doorV.push_back({ {this->doorWidth,  doorHeight,0.0f}, doorColor, nDoor });
+        doorV.push_back({ {0.0f,       doorHeight,0.0f}, doorColor, nDoor });
+
+        doorPanel = BasicShape(doorV);
+
+        // إعداد زاوية الفتح حسب جهة الباب
+        float openAngle = doorAtMaxZ ? -90.0f : 90.0f;
+        doorTargetAngle = doorOpen ? openAngle : 0.0f;
+        doorAngle = doorTargetAngle;
     }
 
     void Room::draw(const glm::mat4& viewProj)
@@ -208,6 +237,16 @@ namespace Example
         {
             podium.render(glm::mat4(1.0f), viewProj);
         }
+
+        // رسم الباب (لوح متحرك)
+        float doorZLocal = doorAtMaxZ ? size : -size;
+        glm::vec3 hingeWorld = centerOffset + glm::vec3(-this->doorWidth / 2.0f, 0.0f, doorZLocal);
+
+        glm::mat4 doorModel(1.0f);
+        doorModel = glm::translate(doorModel, hingeWorld);
+        doorModel = glm::rotate(doorModel, glm::radians(doorAngle), glm::vec3(0, 1, 0));
+
+        doorPanel.render(doorModel, viewProj);
 
         ceilingLight.render(glm::mat4(1.0f), viewProj);
 
@@ -224,16 +263,20 @@ namespace Example
 
         const auto& podium = podiumBounds[podiumIndex];
 
-        glm::vec3 carPos = {
-            podium.xCenter,
-            0.25f,
-            podium.zCenter
-        };
-
-        float carRotation = doorAtMaxZ ? 180.0f : 0.0f;
+        float podiumTopY = 0.25f; // نفس pH عندك للمنصات
 
         auto car = std::make_unique<Car>();
+
+        // أنشئها أولاً بأي y مؤقت
+        glm::vec3 carPos = { podium.xCenter, 0.0f, podium.zCenter };
+
+        float carRotation = doorAtMaxZ ? 180.0f : 0.0f;
         car->create(carPos, carRotation, carColor, interiorColor);
+
+        // ثم اضبط y الصحيح: سطح المنصة - groundClearance
+        carPos.y = podiumTopY - car->getGroundClearance(); // 0.25 - 0.2 = 0.05
+        car->setPosition(carPos);
+
         cars.push_back(std::move(car));
     }
 
@@ -245,5 +288,44 @@ namespace Example
                 return car.get();
         }
         return nullptr;
+    }
+
+    void Room::toggleDoor()
+    {
+        doorOpen = !doorOpen;
+        float openAngle = doorAtMaxZ ? -90.0f : 90.0f;
+        doorTargetAngle = doorOpen ? openAngle : 0.0f;
+    }
+
+    void Room::update(float dt)
+    {
+        // تحديث باب الغرفة
+        float speedDeg = 180.0f; // درجات/ثانية
+        float diff = doorTargetAngle - doorAngle;
+
+        if (std::abs(diff) <= 0.5f)
+        {
+            doorAngle = doorTargetAngle;
+        }
+        else
+        {
+            float step = speedDeg * dt;
+            if (diff > 0) doorAngle += std::min(step, diff);
+            else          doorAngle -= std::min(step, -diff);
+        }
+
+        // ملاحظة: سنحرك السيارات من Showroom::update (حتى نطبق Collision للسيارة)
+    }
+
+    bool Room::isNearDoor(const glm::vec3& playerPos) const
+    {
+        float doorZLocal = doorAtMaxZ ? size : -size;
+        glm::vec3 doorCenter = centerOffset + glm::vec3(0.0f, 0.0f, doorZLocal);
+
+        float dx = std::abs(playerPos.x - doorCenter.x);
+        float dz = std::abs(playerPos.z - doorCenter.z);
+
+        // قريب من فتحة الباب
+        return (dx < 4.0f && dz < 2.0f);
     }
 }

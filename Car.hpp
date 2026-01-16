@@ -56,6 +56,26 @@ namespace Example
         BasicShape grille;            // شبك أمامي
         BasicShape bumpers;           // المصدات
 
+        float baseY = 0.0f;
+        float steer = 0.0f;            // إدخال الستيرينغ
+        float turnRate = 80.0f;        // سرعة الدوران (درجات/ثانية)
+
+
+        // -------- Driver Door Animation --------
+        BasicShape driverDoor;                 // شكل باب السائق (لوح بسيط)
+        glm::vec3 driverDoorHingeLocal = { 0,0,0 }; // موقع المفصلة داخل السيارة (محلي)
+        float driverDoorAngle = 0.0f;          // زاوية حالية
+        float driverDoorTargetAngle = 0.0f;    // زاوية الهدف
+        float driverDoorOpenAngle = -70.0f;    // افتح للخارج (لجهة Z السالب)
+
+        // -------- Car Movement --------
+        float throttle = 0.0f;        // -1 للخلف, +1 للأمام
+        float speed = 0.0f;           // سرعة حالية
+        float maxForwardSpeed = 10.0f;
+        float maxReverseSpeed = 4.0f;
+        float acceleration = 12.0f;   // تسارع
+        float friction = 10.0f;       // احتكاك لإيقاف السيارة بسرعة
+
         // موقع السيارة
         glm::vec3 position;
         float rotation;               // زاوية الدوران حول Y
@@ -80,9 +100,15 @@ namespace Example
         void buildLights();
         void buildDetails();
 
+        void buildDriverDoor();
+
     public:
         Car();
         ~Car() = default;
+
+        
+
+        
 
         // تهيئة السيارة
         void create(glm::vec3 pos, float rotationY = 0.0f,
@@ -105,7 +131,18 @@ namespace Example
         void getCollisionBounds(float& minX, float& maxX, float& minZ, float& maxZ) const;
 
         // Getters
+        void setSteer(float s);  // -1 يسار, +1 يمين
+        void setPosition(const glm::vec3& p) { position = p; }
+        void stopMovement() { speed = 0.0f; throttle = 0.0f; steer = 0.0f; }
+        float getGroundClearance() const { return groundClearance; }
+
         glm::vec3 getPosition() const { return position; }
         float getRotation() const { return rotation; }
+
+
+        void update(float dt);                 // تحديث الباب + الحركة
+        void setDriverDoorOpen(bool open);     // فتح/إغلاق باب السائق
+        void setThrottle(float t);             // t من -1 إلى +1
+        float getSpeed() const { return speed; }
     };
 }

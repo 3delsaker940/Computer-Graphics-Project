@@ -1,9 +1,16 @@
 ﻿#include "Car.hpp"
 #include <cmath>
 #include <glm/gtc/matrix_transform.hpp>
+#include <algorithm>
+
+static float clampf(float v, float lo, float hi)
+{
+    return std::max(lo, std::min(v, hi));
+}
 
 namespace Example
 {
+
     Car::Car() : position(0.0f), rotation(0.0f),
         bodyColor(0.7f, 0.1f, 0.1f),
         interiorColor(0.15f, 0.12f, 0.1f)
@@ -13,11 +20,13 @@ namespace Example
     void Car::create(glm::vec3 pos, float rotationY, glm::vec3 bodyCol, glm::vec3 interiorCol)
     {
         position = pos;
+        baseY = pos.y;
         rotation = rotationY;
         bodyColor = bodyCol;
         interiorColor = interiorCol;
 
         buildExterior();
+        buildDriverDoor();   // ✅ لازم موجود
         buildInterior();
         buildWheels();
         buildLights();
@@ -763,6 +772,104 @@ namespace Example
         windowsRight = BasicShape(windowRightVerts);
     }
 
+    void Car::buildDriverDoor()
+    {
+        std::vector<BasicVertex> doorV;
+
+        float L = length / 2.0f;
+        float W = width / 2.0f;
+        float G = groundClearance;
+
+        // نفس القيم الموجودة عندك تقريباً
+        float cabinStart = -L * 0.1f;
+
+        // موقع المفصلة (باب السائق على الجهة اليسرى Z-)
+        driverDoorHingeLocal = { cabinStart, 0.0f, -W - 0.01f };
+
+        // أبعاد الباب
+        float doorLen = 1.4f;
+        float yBottom = G + 0.25f;
+        float yTop = G + 1.15f;
+
+        glm::vec3 doorColor = bodyColor * 0.85f;
+        glm::vec3 doorNormal = { 0, 0, -1 }; // تقريباً للخارج
+
+        // الباب مرسوم محلياً عند المفصلة: يمتد باتجاه -X
+        doorV.push_back({ {0.0f,      yBottom, 0.0f}, doorColor, doorNormal });
+        doorV.push_back({ {-doorLen,  yBottom, 0.0f}, doorColor, doorNormal });
+        doorV.push_back({ {-doorLen,  yTop,    0.0f}, doorColor, doorNormal });
+
+        doorV.push_back({ {0.0f,      yBottom, 0.0f}, doorColor, doorNormal });
+        doorV.push_back({ {-doorLen,  yTop,    0.0f}, doorColor, doorNormal });
+        doorV.push_back({ {0.0f,      yTop,    0.0f}, doorColor, doorNormal });
+
+        driverDoor = BasicShape(doorV);
+
+        // يبدأ مغلق
+        driverDoorAngle = 0.0f;
+        driverDoorTargetAngle = 0.0f;
+    }
+
+    void Car::setDriverDoorOpen(bool open)
+    {
+        driverDoorTargetAngle = open ? driverDoorOpenAngle : 0.0f;
+    }
+
+    void Car::setThrottle(float t)
+    {
+        throttle = clampf(t, -1.0f, 1.0f);
+    }
+
+    void Car::setSteer(float s)
+    {
+        steer = clampf(s, -1.0f, 1.0f);
+    }
+
+    void Car::update(float dt)
+    {
+        // ───────────── Door animation ─────────────
+        float doorSpeed = 180.0f;
+        float d = driverDoorTargetAngle - driverDoorAngle;
+        float step = doorSpeed * dt;
+
+        if (std::abs(d) <= 0.5f) driverDoorAngle = driverDoorTargetAngle;
+        else driverDoorAngle += (d > 0 ? std::min(step, d) : -std::min(step, -d));
+
+        // ───────────── Movement (speed) ─────────────
+        if (std::abs(throttle) > 0.01f)
+        {
+            speed += throttle * acceleration * dt;
+            speed = clampf(speed, -maxReverseSpeed, maxForwardSpeed);
+        }
+        else
+        {
+            if (speed > 0) speed = std::max(0.0f, speed - friction * dt);
+            if (speed < 0) speed = std::min(0.0f, speed + friction * dt);
+        }
+
+        // ───────────── Steering ─────────────
+        float speedAbs = std::abs(speed);
+        if (speedAbs > 0.05f)
+        {
+            float factor = std::min(1.0f, speedAbs / maxForwardSpeed);
+            float dir = (speed >= 0.0f) ? 1.0f : -1.0f; // عند الرجوع توجيه معكوس
+
+            rotation += steer * turnRate * dt * factor * dir;
+
+            if (rotation > 360.0f) rotation -= 360.0f;
+            if (rotation < 0.0f) rotation += 360.0f;
+        }
+
+        // ───────────── Apply position ─────────────
+        float rad = glm::radians(rotation);
+        glm::vec3 forward = { (float)std::cos(rad), 0.0f, (float)std::sin(rad) };
+
+        position += forward * speed * dt;
+
+        // ✅ لا تجبرها على 0.25 (هذا كان يسبب مشاكل)
+        position.y = baseY;
+    }
+
     void Car::render(const glm::mat4& viewProj)
     {
         glm::mat4 model = glm::mat4(1.0f);
@@ -793,10 +900,19 @@ namespace Example
         gearShift.render(model, viewProj);
         interiorPanels.render(model, viewProj);
 
+        // رسم باب السائق المتحرك
+        glm::mat4 doorModel = model;
+        doorModel = glm::translate(doorModel, driverDoorHingeLocal);
+        doorModel = glm::rotate(doorModel, glm::radians(driverDoorAngle), glm::vec3(0, 1, 0));
+        driverDoor.render(doorModel, viewProj);
+
         windowFront.render(model, viewProj, 0.4f);
         windowRear.render(model, viewProj, 0.4f);
         windowsLeft.render(model, viewProj, 0.4f);
         windowsRight.render(model, viewProj, 0.4f);
+
+        
+        
     }
 
     glm::vec3 Car::getDriverSeatPosition() const
