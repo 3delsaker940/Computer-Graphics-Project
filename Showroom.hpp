@@ -41,7 +41,13 @@ namespace Example
         Example::BasicShape windowGlass;
         Example::BasicShape mainDoorFrame;
 
-        ExteriorWallBounds exteriorBounds;
+
+        ExteriorWallBounds exteriorBounds;      // حدود التصادم
+        BasicShape streetLamps;      // أعمدة الإنارة
+
+        //مشان الدوار
+        Example::BasicShape roundabout;
+
 
     public:
         // ✅ جديد: مدير الإضاءة (public للوصول إليه)

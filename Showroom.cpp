@@ -1,6 +1,7 @@
 ﻿#include "Showroom.hpp"
 #include <iostream>
 #include <cmath>
+#include <algorithm>
 
 namespace Example
 {
@@ -9,22 +10,20 @@ namespace Example
         // ═══════════════════════════════════════════════════════════
         // ثوابت المعرض
         // ═══════════════════════════════════════════════════════════
-        float showroomSize = 70.0f;    // نصف حجم المعرض
-        float wallHeight = 15.0f;      // ارتفاع الجدران
-        float wallThickness = 0.5f;    // سماكة الجدار
+        float showroomSize = 70.0f;
+        float wallHeight = 15.0f;
 
-        // الباب الرئيسي
-        float mainDoorWidth = 10.0f;   // عرض الباب
-        float mainDoorHeight = 5.0f;   // ارتفاع الباب
+        float mainDoorWidth = 10.0f;
+        float mainDoorHeight = 5.0f;
         float mainDoorHalfW = mainDoorWidth / 2.0f;
 
-        // النوافذ
-        float windowWidth = 35.0f;     // عرض النافذة
-        float windowBottom = 1.5f;     // ارتفاع بداية النافذة
-        float windowTop = 12.0f;       // ارتفاع نهاية النافذة
+        float windowWidth = 35.0f;
+        float windowBottom = 1.5f;
+        float windowTop = 12.0f;
         float windowHalfW = windowWidth / 2.0f;
 
-        // ✅ حفظ حدود التصادم
+        float PI = 3.14159265f;
+
         exteriorBounds.minX = -showroomSize;
         exteriorBounds.maxX = showroomSize;
         exteriorBounds.minZ = -showroomSize;
@@ -32,6 +31,9 @@ namespace Example
         exteriorBounds.doorMinX = -mainDoorHalfW;
         exteriorBounds.doorMaxX = mainDoorHalfW;
         exteriorBounds.doorZ = showroomSize;
+
+        float S = showroomSize;
+        float H = wallHeight;
 
         // ═══════════════════════════════════════════════════════════
         // 1. الأرضية الكبرى
@@ -52,26 +54,21 @@ namespace Example
         // ═══════════════════════════════════════════════════════════
         std::vector<BasicVertex> ceilVerts;
         glm::vec3 ceilColor = { 0.12f, 0.12f, 0.15f };
-        ceilVerts.push_back({ {-showroomSize, wallHeight, -showroomSize}, ceilColor });
-        ceilVerts.push_back({ {showroomSize, wallHeight, -showroomSize}, ceilColor });
-        ceilVerts.push_back({ {showroomSize, wallHeight, showroomSize}, ceilColor });
-        ceilVerts.push_back({ {-showroomSize, wallHeight, -showroomSize}, ceilColor });
-        ceilVerts.push_back({ {showroomSize, wallHeight, showroomSize}, ceilColor });
-        ceilVerts.push_back({ {-showroomSize, wallHeight, showroomSize}, ceilColor });
+        ceilVerts.push_back({ {-S, H, -S}, ceilColor });
+        ceilVerts.push_back({ {S, H, -S}, ceilColor });
+        ceilVerts.push_back({ {S, H, S}, ceilColor });
+        ceilVerts.push_back({ {-S, H, -S}, ceilColor });
+        ceilVerts.push_back({ {S, H, S}, ceilColor });
+        ceilVerts.push_back({ {-S, H, S}, ceilColor });
         ceiling = BasicShape(ceilVerts);
 
         // ═══════════════════════════════════════════════════════════
-        // 3. الجدران الخارجية ✅
+        // 3. الجدران الخارجية
         // ═══════════════════════════════════════════════════════════
         std::vector<BasicVertex> wallVerts;
-        glm::vec3 wallColorOut = { 0.25f, 0.25f, 0.28f };   // اللون الخارجي
-        glm::vec3 wallColorIn = { 0.35f, 0.35f, 0.38f };    // اللون الداخلي
-        glm::vec3 wallColorDark = { 0.18f, 0.18f, 0.20f };  // الحواف
+        glm::vec3 wallColorOut = { 0.25f, 0.25f, 0.28f };
+        glm::vec3 wallColorIn = { 0.35f, 0.35f, 0.38f };
 
-        float S = showroomSize;
-        float H = wallHeight;
-
-        // دالة مساعدة لإضافة مستطيل (وجه جدار)
         auto addQuad = [&](glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4, glm::vec3 col)
             {
                 wallVerts.push_back({ p1, col });
@@ -82,61 +79,33 @@ namespace Example
                 wallVerts.push_back({ p4, col });
             };
 
-        // ─────────────────────────────────────────
-        // الجدار الخلفي (Z = -S) - مع نافذة
-        // ─────────────────────────────────────────
-        // الجزء الأيسر من النافذة
         addQuad({ -S, 0, -S }, { -windowHalfW, 0, -S }, { -windowHalfW, H, -S }, { -S, H, -S }, wallColorIn);
-        // الجزء الأيمن من النافذة
         addQuad({ windowHalfW, 0, -S }, { S, 0, -S }, { S, H, -S }, { windowHalfW, H, -S }, wallColorIn);
-        // الجزء تحت النافذة
         addQuad({ -windowHalfW, 0, -S }, { windowHalfW, 0, -S }, { windowHalfW, windowBottom, -S }, { -windowHalfW, windowBottom, -S }, wallColorIn);
-        // الجزء فوق النافذة
         addQuad({ -windowHalfW, windowTop, -S }, { windowHalfW, windowTop, -S }, { windowHalfW, H, -S }, { -windowHalfW, H, -S }, wallColorIn);
 
-        // ─────────────────────────────────────────
-        // الجدار الأمامي (Z = +S) - مع الباب الرئيسي
-        // ─────────────────────────────────────────
-        // الجزء الأيسر من الباب
         addQuad({ -S, 0, S }, { -mainDoorHalfW, 0, S }, { -mainDoorHalfW, H, S }, { -S, H, S }, wallColorOut);
-        // الجزء الأيمن من الباب
         addQuad({ mainDoorHalfW, 0, S }, { S, 0, S }, { S, H, S }, { mainDoorHalfW, H, S }, wallColorOut);
-        // الجزء فوق الباب
         addQuad({ -mainDoorHalfW, mainDoorHeight, S }, { mainDoorHalfW, mainDoorHeight, S }, { mainDoorHalfW, H, S }, { -mainDoorHalfW, H, S }, wallColorOut);
 
-        // ─────────────────────────────────────────
-        // الجدار الأيسر (X = -S) - مع نافذة
-        // ─────────────────────────────────────────
-        // الجزء الخلفي من النافذة
         addQuad({ -S, 0, -S }, { -S, 0, -windowHalfW }, { -S, H, -windowHalfW }, { -S, H, -S }, wallColorOut);
-        // الجزء الأمامي من النافذة
         addQuad({ -S, 0, windowHalfW }, { -S, 0, S }, { -S, H, S }, { -S, H, windowHalfW }, wallColorOut);
-        // الجزء تحت النافذة
         addQuad({ -S, 0, -windowHalfW }, { -S, 0, windowHalfW }, { -S, windowBottom, windowHalfW }, { -S, windowBottom, -windowHalfW }, wallColorOut);
-        // الجزء فوق النافذة
         addQuad({ -S, windowTop, -windowHalfW }, { -S, windowTop, windowHalfW }, { -S, H, windowHalfW }, { -S, H, -windowHalfW }, wallColorOut);
 
-        // ─────────────────────────────────────────
-        // الجدار الأيمن (X = +S) - مع نافذة
-        // ─────────────────────────────────────────
-        // الجزء الخلفي من النافذة
         addQuad({ S, 0, -windowHalfW }, { S, 0, -S }, { S, H, -S }, { S, H, -windowHalfW }, wallColorOut);
-        // الجزء الأمامي من النافذة
         addQuad({ S, 0, S }, { S, 0, windowHalfW }, { S, H, windowHalfW }, { S, H, S }, wallColorOut);
-        // الجزء تحت النافذة
         addQuad({ S, 0, windowHalfW }, { S, 0, -windowHalfW }, { S, windowBottom, -windowHalfW }, { S, windowBottom, windowHalfW }, wallColorOut);
-        // الجزء فوق النافذة
         addQuad({ S, windowTop, windowHalfW }, { S, windowTop, -windowHalfW }, { S, H, -windowHalfW }, { S, H, windowHalfW }, wallColorOut);
 
         exteriorWalls = BasicShape(wallVerts);
 
         // ═══════════════════════════════════════════════════════════
-        // 4. زجاج النوافذ (شفاف) ✅
+        // 4. زجاج النوافذ
         // ═══════════════════════════════════════════════════════════
         std::vector<BasicVertex> glassVerts;
-        glm::vec3 glassColor = { 0.6f, 0.8f, 0.9f };  // أزرق سماوي فاتح
+        glm::vec3 glassColor = { 0.6f, 0.8f, 0.9f };
 
-        // ✅ إنشاء lambda جديدة باسم مختلف
         auto addGlassQuad = [&](glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4, glm::vec3 col)
             {
                 glassVerts.push_back({ p1, col });
@@ -147,53 +116,22 @@ namespace Example
                 glassVerts.push_back({ p4, col });
             };
 
-        // نافذة خلفية (Z = -S)
         addGlassQuad({ -windowHalfW, windowBottom, -S + 0.05f }, { windowHalfW, windowBottom, -S + 0.05f },
             { windowHalfW, windowTop, -S + 0.05f }, { -windowHalfW, windowTop, -S + 0.05f }, glassColor);
-
-        // نافذة يسار (X = -S)
         addGlassQuad({ -S + 0.05f, windowBottom, -windowHalfW }, { -S + 0.05f, windowBottom, windowHalfW },
             { -S + 0.05f, windowTop, windowHalfW }, { -S + 0.05f, windowTop, -windowHalfW }, glassColor);
-
-        // نافذة يمين (X = +S)
         addGlassQuad({ S - 0.05f, windowBottom, windowHalfW }, { S - 0.05f, windowBottom, -windowHalfW },
             { S - 0.05f, windowTop, -windowHalfW }, { S - 0.05f, windowTop, windowHalfW }, glassColor);
 
         windowGlass = BasicShape(glassVerts);
 
         // ═══════════════════════════════════════════════════════════
-        // 5. إطارات النوافذ والباب ✅
+        // 5. إطارات النوافذ
         // ═══════════════════════════════════════════════════════════
         std::vector<BasicVertex> frameVerts;
-        glm::vec3 frameColor = { 0.1f, 0.1f, 0.12f };  // رمادي غامق
-        float frameW = 0.3f;  // عرض الإطار
+        glm::vec3 frameColor = { 0.1f, 0.1f, 0.12f };
+        float frameW = 0.3f;
 
-        auto addFrame = [&](float x1, float z1, float x2, float z2, float y1, float y2, bool isVertical)
-            {
-                if (isVertical)
-                {
-                    // إطار عمودي
-                    frameVerts.push_back({ {x1 - frameW, y1, z1}, frameColor });
-                    frameVerts.push_back({ {x1 + frameW, y1, z1}, frameColor });
-                    frameVerts.push_back({ {x1 + frameW, y2, z1}, frameColor });
-                    frameVerts.push_back({ {x1 - frameW, y1, z1}, frameColor });
-                    frameVerts.push_back({ {x1 + frameW, y2, z1}, frameColor });
-                    frameVerts.push_back({ {x1 - frameW, y2, z1}, frameColor });
-                }
-                else
-                {
-                    // إطار أفقي
-                    frameVerts.push_back({ {x1, y1 - frameW, z1}, frameColor });
-                    frameVerts.push_back({ {x2, y1 - frameW, z2}, frameColor });
-                    frameVerts.push_back({ {x2, y1 + frameW, z2}, frameColor });
-                    frameVerts.push_back({ {x1, y1 - frameW, z1}, frameColor });
-                    frameVerts.push_back({ {x2, y1 + frameW, z2}, frameColor });
-                    frameVerts.push_back({ {x1, y1 + frameW, z1}, frameColor });
-                }
-            };
-
-        // إطارات النافذة الخلفية (Z = -S)
-        // إطار يسار
         frameVerts.push_back({ {-windowHalfW - frameW, windowBottom, -S + 0.1f}, frameColor });
         frameVerts.push_back({ {-windowHalfW + frameW, windowBottom, -S + 0.1f}, frameColor });
         frameVerts.push_back({ {-windowHalfW + frameW, windowTop, -S + 0.1f}, frameColor });
@@ -201,7 +139,6 @@ namespace Example
         frameVerts.push_back({ {-windowHalfW + frameW, windowTop, -S + 0.1f}, frameColor });
         frameVerts.push_back({ {-windowHalfW - frameW, windowTop, -S + 0.1f}, frameColor });
 
-        // إطار يمين
         frameVerts.push_back({ {windowHalfW - frameW, windowBottom, -S + 0.1f}, frameColor });
         frameVerts.push_back({ {windowHalfW + frameW, windowBottom, -S + 0.1f}, frameColor });
         frameVerts.push_back({ {windowHalfW + frameW, windowTop, -S + 0.1f}, frameColor });
@@ -209,7 +146,6 @@ namespace Example
         frameVerts.push_back({ {windowHalfW + frameW, windowTop, -S + 0.1f}, frameColor });
         frameVerts.push_back({ {windowHalfW - frameW, windowTop, -S + 0.1f}, frameColor });
 
-        // إطار علوي
         frameVerts.push_back({ {-windowHalfW, windowTop - frameW, -S + 0.1f}, frameColor });
         frameVerts.push_back({ {windowHalfW, windowTop - frameW, -S + 0.1f}, frameColor });
         frameVerts.push_back({ {windowHalfW, windowTop + frameW, -S + 0.1f}, frameColor });
@@ -217,7 +153,6 @@ namespace Example
         frameVerts.push_back({ {windowHalfW, windowTop + frameW, -S + 0.1f}, frameColor });
         frameVerts.push_back({ {-windowHalfW, windowTop + frameW, -S + 0.1f}, frameColor });
 
-        // إطار سفلي
         frameVerts.push_back({ {-windowHalfW, windowBottom - frameW, -S + 0.1f}, frameColor });
         frameVerts.push_back({ {windowHalfW, windowBottom - frameW, -S + 0.1f}, frameColor });
         frameVerts.push_back({ {windowHalfW, windowBottom + frameW, -S + 0.1f}, frameColor });
@@ -228,13 +163,12 @@ namespace Example
         windowFrames = BasicShape(frameVerts);
 
         // ═══════════════════════════════════════════════════════════
-        // 6. إطار الباب الرئيسي ✅
+        // 6. إطار الباب الرئيسي
         // ═══════════════════════════════════════════════════════════
         std::vector<BasicVertex> doorFrameVerts;
         glm::vec3 doorFrameCol = { 0.08f, 0.08f, 0.1f };
-        float dfW = 0.4f;  // عرض إطار الباب
+        float dfW = 0.4f;
 
-        // الإطار الأيسر
         doorFrameVerts.push_back({ {-mainDoorHalfW - dfW, 0, S - 0.1f}, doorFrameCol });
         doorFrameVerts.push_back({ {-mainDoorHalfW + dfW, 0, S - 0.1f}, doorFrameCol });
         doorFrameVerts.push_back({ {-mainDoorHalfW + dfW, mainDoorHeight, S - 0.1f}, doorFrameCol });
@@ -242,7 +176,6 @@ namespace Example
         doorFrameVerts.push_back({ {-mainDoorHalfW + dfW, mainDoorHeight, S - 0.1f}, doorFrameCol });
         doorFrameVerts.push_back({ {-mainDoorHalfW - dfW, mainDoorHeight, S - 0.1f}, doorFrameCol });
 
-        // الإطار الأيمن
         doorFrameVerts.push_back({ {mainDoorHalfW - dfW, 0, S - 0.1f}, doorFrameCol });
         doorFrameVerts.push_back({ {mainDoorHalfW + dfW, 0, S - 0.1f}, doorFrameCol });
         doorFrameVerts.push_back({ {mainDoorHalfW + dfW, mainDoorHeight, S - 0.1f}, doorFrameCol });
@@ -250,7 +183,6 @@ namespace Example
         doorFrameVerts.push_back({ {mainDoorHalfW + dfW, mainDoorHeight, S - 0.1f}, doorFrameCol });
         doorFrameVerts.push_back({ {mainDoorHalfW - dfW, mainDoorHeight, S - 0.1f}, doorFrameCol });
 
-        // الإطار العلوي
         doorFrameVerts.push_back({ {-mainDoorHalfW, mainDoorHeight - dfW, S - 0.1f}, doorFrameCol });
         doorFrameVerts.push_back({ {mainDoorHalfW, mainDoorHeight - dfW, S - 0.1f}, doorFrameCol });
         doorFrameVerts.push_back({ {mainDoorHalfW, mainDoorHeight + dfW, S - 0.1f}, doorFrameCol });
@@ -261,7 +193,7 @@ namespace Example
         mainDoorFrame = BasicShape(doorFrameVerts);
 
         // ═══════════════════════════════════════════════════════════
-        // 7. الأعمدة المحسّنة
+        // 7. الأعمدة
         // ═══════════════════════════════════════════════════════════
         std::vector<BasicVertex> colVerts;
         glm::vec3 colMain = { 0.35f, 0.35f, 0.40f };
@@ -269,14 +201,14 @@ namespace Example
         glm::vec3 colBase = { 0.45f, 0.45f, 0.50f };
         glm::vec3 colAccent = { 0.55f, 0.55f, 0.60f };
 
-        float cw = 1.2f;
-        float baseW = 1.6f;
+        float cw = 1.0f;
+        float baseW = 1.4f;
         float baseH = 0.5f;
         float capH = 0.4f;
 
         float columnPositions[4][2] = {
-            {15.0f, 15.0f}, {-15.0f, 15.0f},
-            {15.0f, -15.0f}, {-15.0f, -15.0f}
+            {25.0f, 25.0f}, {-25.0f, 25.0f},
+            {25.0f, -25.0f}, {-25.0f, -25.0f}
         };
 
         columnBounds.clear();
@@ -286,8 +218,6 @@ namespace Example
             float x = columnPositions[i][0];
             float z = columnPositions[i][1];
 
-            // القاعدة - 4 جوانب + سطح علوي
-            // الأمام
             colVerts.push_back({ {x - baseW, 0, z + baseW}, colBase });
             colVerts.push_back({ {x + baseW, 0, z + baseW}, colBase });
             colVerts.push_back({ {x + baseW, baseH, z + baseW}, colAccent });
@@ -295,7 +225,6 @@ namespace Example
             colVerts.push_back({ {x + baseW, baseH, z + baseW}, colAccent });
             colVerts.push_back({ {x - baseW, baseH, z + baseW}, colAccent });
 
-            // الخلف
             colVerts.push_back({ {x + baseW, 0, z - baseW}, colBase });
             colVerts.push_back({ {x - baseW, 0, z - baseW}, colBase });
             colVerts.push_back({ {x - baseW, baseH, z - baseW}, colAccent });
@@ -303,7 +232,6 @@ namespace Example
             colVerts.push_back({ {x - baseW, baseH, z - baseW}, colAccent });
             colVerts.push_back({ {x + baseW, baseH, z - baseW}, colAccent });
 
-            // اليسار
             colVerts.push_back({ {x - baseW, 0, z - baseW}, colBase });
             colVerts.push_back({ {x - baseW, 0, z + baseW}, colBase });
             colVerts.push_back({ {x - baseW, baseH, z + baseW}, colAccent });
@@ -311,7 +239,6 @@ namespace Example
             colVerts.push_back({ {x - baseW, baseH, z + baseW}, colAccent });
             colVerts.push_back({ {x - baseW, baseH, z - baseW}, colAccent });
 
-            // اليمين
             colVerts.push_back({ {x + baseW, 0, z + baseW}, colBase });
             colVerts.push_back({ {x + baseW, 0, z - baseW}, colBase });
             colVerts.push_back({ {x + baseW, baseH, z - baseW}, colAccent });
@@ -319,7 +246,6 @@ namespace Example
             colVerts.push_back({ {x + baseW, baseH, z - baseW}, colAccent });
             colVerts.push_back({ {x + baseW, baseH, z + baseW}, colAccent });
 
-            // السطح العلوي للقاعدة
             colVerts.push_back({ {x - baseW, baseH, z - baseW}, colAccent });
             colVerts.push_back({ {x + baseW, baseH, z - baseW}, colAccent });
             colVerts.push_back({ {x + baseW, baseH, z + baseW}, colAccent });
@@ -327,9 +253,8 @@ namespace Example
             colVerts.push_back({ {x + baseW, baseH, z + baseW}, colAccent });
             colVerts.push_back({ {x - baseW, baseH, z + baseW}, colAccent });
 
-            // الجسم الرئيسي - 4 جوانب
             float bodyBottom = baseH;
-            float bodyTop = wallHeight - capH;
+            float bodyTop = H - capH;
 
             colVerts.push_back({ {x - cw, bodyBottom, z + cw}, colMain });
             colVerts.push_back({ {x + cw, bodyBottom, z + cw}, colMain });
@@ -359,9 +284,8 @@ namespace Example
             colVerts.push_back({ {x + cw, bodyTop, z - cw}, colMain });
             colVerts.push_back({ {x + cw, bodyTop, z + cw}, colMain });
 
-            // التاج - 4 جوانب
-            float capBottom = wallHeight - capH;
-            float capTop = wallHeight;
+            float capBottom = H - capH;
+            float capTop = H;
 
             colVerts.push_back({ {x - baseW, capBottom, z + baseW}, colAccent });
             colVerts.push_back({ {x + baseW, capBottom, z + baseW}, colAccent });
@@ -432,39 +356,213 @@ namespace Example
         std::cout << "💡 Press E near a car to enter/exit" << std::endl;
 
         // ═══════════════════════════════════════════════════════════
-        // 9. الشارع والرصيف
+        // ✅ 9. الشوارع والتقاطع
         // ═══════════════════════════════════════════════════════════
         std::vector<BasicVertex> roadV;
         glm::vec3 asphaltCol = { 0.15f, 0.15f, 0.15f };
-        float roadW = 8.0f;
-        float roadL = 150.0f;
 
-        roadV.push_back({ {-roadW, 0.02f, -roadL}, asphaltCol });
-        roadV.push_back({ {roadW, 0.02f, -roadL}, asphaltCol });
-        roadV.push_back({ {roadW, 0.02f, roadL}, asphaltCol });
-        roadV.push_back({ {-roadW, 0.02f, -roadL}, asphaltCol });
-        roadV.push_back({ {roadW, 0.02f, roadL}, asphaltCol });
-        roadV.push_back({ {-roadW, 0.02f, roadL}, asphaltCol });
+        float roadW = 6.0f;
+        float roadLongNS = 150.0f;
+        float roadLongEW = 80.0f;
+        float intersectSize = roadW;  // ✅ التقاطع بنفس حجم عرض الطريق
+
+        // الطريق الشمالي
+        roadV.push_back({ {-roadW, 0.02f, intersectSize}, asphaltCol });
+        roadV.push_back({ {roadW, 0.02f, intersectSize}, asphaltCol });
+        roadV.push_back({ {roadW, 0.02f, roadLongNS}, asphaltCol });
+        roadV.push_back({ {-roadW, 0.02f, intersectSize}, asphaltCol });
+        roadV.push_back({ {roadW, 0.02f, roadLongNS}, asphaltCol });
+        roadV.push_back({ {-roadW, 0.02f, roadLongNS}, asphaltCol });
+
+        // الطريق الجنوبي
+        roadV.push_back({ {-roadW, 0.02f, -roadLongNS}, asphaltCol });
+        roadV.push_back({ {roadW, 0.02f, -roadLongNS}, asphaltCol });
+        roadV.push_back({ {roadW, 0.02f, -intersectSize}, asphaltCol });
+        roadV.push_back({ {-roadW, 0.02f, -roadLongNS}, asphaltCol });
+        roadV.push_back({ {roadW, 0.02f, -intersectSize}, asphaltCol });
+        roadV.push_back({ {-roadW, 0.02f, -intersectSize}, asphaltCol });
+
+        // الطريق الشرقي
+        roadV.push_back({ {intersectSize, 0.02f, -roadW}, asphaltCol });
+        roadV.push_back({ {roadLongEW, 0.02f, -roadW}, asphaltCol });
+        roadV.push_back({ {roadLongEW, 0.02f, roadW}, asphaltCol });
+        roadV.push_back({ {intersectSize, 0.02f, -roadW}, asphaltCol });
+        roadV.push_back({ {roadLongEW, 0.02f, roadW}, asphaltCol });
+        roadV.push_back({ {intersectSize, 0.02f, roadW}, asphaltCol });
+
+        // الطريق الغربي
+        roadV.push_back({ {-roadLongEW, 0.02f, -roadW}, asphaltCol });
+        roadV.push_back({ {-intersectSize, 0.02f, -roadW}, asphaltCol });
+        roadV.push_back({ {-intersectSize, 0.02f, roadW}, asphaltCol });
+        roadV.push_back({ {-roadLongEW, 0.02f, -roadW}, asphaltCol });
+        roadV.push_back({ {-intersectSize, 0.02f, roadW}, asphaltCol });
+        roadV.push_back({ {-roadLongEW, 0.02f, roadW}, asphaltCol });
+
+        // التقاطع المربع
+        roadV.push_back({ {-intersectSize, 0.02f, -intersectSize}, asphaltCol });
+        roadV.push_back({ {intersectSize, 0.02f, -intersectSize}, asphaltCol });
+        roadV.push_back({ {intersectSize, 0.02f, intersectSize}, asphaltCol });
+        roadV.push_back({ {-intersectSize, 0.02f, -intersectSize}, asphaltCol });
+        roadV.push_back({ {intersectSize, 0.02f, intersectSize}, asphaltCol });
+        roadV.push_back({ {-intersectSize, 0.02f, intersectSize}, asphaltCol });
+
         streetAsphalt = BasicShape(roadV);
 
+        // ═══════════════════════════════════════════════════════════
+        // ✅ 10. الدوّار (دائرة بسيطة في المنتصف)
+        // ═══════════════════════════════════════════════════════════
+        std::vector<BasicVertex> roundaboutV;
+        glm::vec3 greenCol = { 0.15f, 0.45f, 0.15f };
+        glm::vec3 darkGreen = { 0.1f, 0.35f, 0.1f };
+        glm::vec3 curbCol = { 0.5f, 0.5f, 0.52f };
+
+        float centerRadius = 3.0f;
+        float yLevel = 0.05f;
+        int segments = 32;
+
+        for (int i = 0; i < segments; i++)
+        {
+            float angle1 = (2.0f * PI * i) / segments;
+            float angle2 = (2.0f * PI * (i + 1)) / segments;
+
+            glm::vec3 p1 = { 0.0f, yLevel + 0.15f, 0.0f };
+            glm::vec3 p2 = { centerRadius * cos(angle1), yLevel + 0.15f, centerRadius * sin(angle1) };
+            glm::vec3 p3 = { centerRadius * cos(angle2), yLevel + 0.15f, centerRadius * sin(angle2) };
+
+            glm::vec3 col = (i % 2 == 0) ? greenCol : darkGreen;
+            roundaboutV.push_back({ p1, greenCol });
+            roundaboutV.push_back({ p2, col });
+            roundaboutV.push_back({ p3, col });
+        }
+
+        float curbWidth = 0.4f;
+        for (int i = 0; i < segments; i++)
+        {
+            float angle1 = (2.0f * PI * i) / segments;
+            float angle2 = (2.0f * PI * (i + 1)) / segments;
+
+            float r1 = centerRadius;
+            float r2 = centerRadius + curbWidth;
+
+            glm::vec3 in1 = { r1 * cos(angle1), yLevel + 0.15f, r1 * sin(angle1) };
+            glm::vec3 in2 = { r1 * cos(angle2), yLevel + 0.15f, r1 * sin(angle2) };
+            glm::vec3 out1 = { r2 * cos(angle1), yLevel + 0.10f, r2 * sin(angle1) };
+            glm::vec3 out2 = { r2 * cos(angle2), yLevel + 0.10f, r2 * sin(angle2) };
+
+            roundaboutV.push_back({ in1, curbCol });
+            roundaboutV.push_back({ out1, curbCol * 0.8f });
+            roundaboutV.push_back({ out2, curbCol * 0.8f });
+            roundaboutV.push_back({ in1, curbCol });
+            roundaboutV.push_back({ out2, curbCol * 0.8f });
+            roundaboutV.push_back({ in2, curbCol });
+
+            glm::vec3 outBottom1 = { r2 * cos(angle1), yLevel, r2 * sin(angle1) };
+            glm::vec3 outBottom2 = { r2 * cos(angle2), yLevel, r2 * sin(angle2) };
+
+            roundaboutV.push_back({ outBottom1, curbCol * 0.6f });
+            roundaboutV.push_back({ out1, curbCol * 0.8f });
+            roundaboutV.push_back({ out2, curbCol * 0.8f });
+            roundaboutV.push_back({ outBottom1, curbCol * 0.6f });
+            roundaboutV.push_back({ out2, curbCol * 0.8f });
+            roundaboutV.push_back({ outBottom2, curbCol * 0.6f });
+        }
+
+        roundabout = BasicShape(roundaboutV);
+
+        // ═══════════════════════════════════════════════════════════
+        // ✅ 11. الأرصفة (مصححة ومتصلة)
+        // ═══════════════════════════════════════════════════════════
         std::vector<BasicVertex> sideV;
         glm::vec3 lightGrey = { 0.7f, 0.7f, 0.7f };
         glm::vec3 darkGrey = { 0.3f, 0.3f, 0.3f };
-        glm::vec3 yellow = { 1.0f, 1.0f, 0.0f };
-        float sW = 1.5f;
-        float tileL = 2.0f;
+        glm::vec3 yellow = { 0.9f, 0.8f, 0.0f };
 
-        auto addDetailedSidewalk = [&](float xPos)
+        float sW = 1.5f;
+        float sidewalkWidth = sW * 2;  // 3.0
+        float tileL = 2.0f;
+        float yTop = 0.25f;
+        float yBottom = 0.02f;
+
+        // ✅ حساب نقاط البداية والنهاية
+        float sidewalkEdge = roadW + sidewalkWidth;  // 6 + 3 = 9
+        float cornerStart = intersectSize;  // 6
+        float cornerEnd = intersectSize + sidewalkWidth;  // 9
+
+        // ─────────────────────────────────────────────────────────────
+        // دالة مساعدة: مستطيل رصيف مع كيرب
+        // ─────────────────────────────────────────────────────────────
+        auto addSidewalkRect = [&](float x1, float x2, float z1, float z2,
+            bool curbLeft, bool curbRight, bool curbFront, bool curbBack)
             {
-                for (float z = -roadL; z < roadL; z += tileL)
+                glm::vec3 col = lightGrey;
+
+                // السطح العلوي
+                sideV.push_back({ {x1, yTop, z1}, col });
+                sideV.push_back({ {x2, yTop, z1}, col });
+                sideV.push_back({ {x2, yTop, z2}, col });
+                sideV.push_back({ {x1, yTop, z1}, col });
+                sideV.push_back({ {x2, yTop, z2}, col });
+                sideV.push_back({ {x1, yTop, z2}, col });
+
+                // الكيرب الأيسر
+                if (curbLeft)
                 {
-                    glm::vec3 currentCol = ((int)((z + roadL) / tileL) % 2 == 0) ? lightGrey : lightGrey * 0.9f;
-                    float xMin = xPos - sW;
-                    float xMax = xPos + sW;
+                    sideV.push_back({ {x1, yBottom, z1}, yellow });
+                    sideV.push_back({ {x1, yTop, z1}, darkGrey });
+                    sideV.push_back({ {x1, yTop, z2}, darkGrey });
+                    sideV.push_back({ {x1, yBottom, z1}, yellow });
+                    sideV.push_back({ {x1, yTop, z2}, darkGrey });
+                    sideV.push_back({ {x1, yBottom, z2}, yellow });
+                }
+
+                // الكيرب الأيمن
+                if (curbRight)
+                {
+                    sideV.push_back({ {x2, yBottom, z1}, yellow });
+                    sideV.push_back({ {x2, yTop, z1}, darkGrey });
+                    sideV.push_back({ {x2, yTop, z2}, darkGrey });
+                    sideV.push_back({ {x2, yBottom, z1}, yellow });
+                    sideV.push_back({ {x2, yTop, z2}, darkGrey });
+                    sideV.push_back({ {x2, yBottom, z2}, yellow });
+                }
+
+                // الكيرب الأمامي
+                if (curbFront)
+                {
+                    sideV.push_back({ {x1, yBottom, z2}, yellow });
+                    sideV.push_back({ {x1, yTop, z2}, darkGrey });
+                    sideV.push_back({ {x2, yTop, z2}, darkGrey });
+                    sideV.push_back({ {x1, yBottom, z2}, yellow });
+                    sideV.push_back({ {x2, yTop, z2}, darkGrey });
+                    sideV.push_back({ {x2, yBottom, z2}, yellow });
+                }
+
+                // الكيرب الخلفي
+                if (curbBack)
+                {
+                    sideV.push_back({ {x1, yBottom, z1}, yellow });
+                    sideV.push_back({ {x1, yTop, z1}, darkGrey });
+                    sideV.push_back({ {x2, yTop, z1}, darkGrey });
+                    sideV.push_back({ {x1, yBottom, z1}, yellow });
+                    sideV.push_back({ {x2, yTop, z1}, darkGrey });
+                    sideV.push_back({ {x2, yBottom, z1}, yellow });
+                }
+            };
+
+        // ─────────────────────────────────────────────────────────────
+        // رصيف عمودي مبلط
+        // ─────────────────────────────────────────────────────────────
+        auto addVerticalSidewalk = [&](float xPos, float zStart, float zEnd)
+            {
+                float xMin = xPos - sW;
+                float xMax = xPos + sW;
+                bool isRight = (xPos > 0);
+
+                for (float z = zStart; z < zEnd; z += tileL)
+                {
+                    glm::vec3 currentCol = ((int)((z - zStart) / tileL) % 2 == 0) ? lightGrey : lightGrey * 0.92f;
                     float zMin = z;
-                    float zMax = z + tileL - 0.1f;
-                    float yTop = 0.45f;
-                    float yBottom = 0.02f;
+                    float zMax = std::min(z + tileL - 0.1f, zEnd);
 
                     sideV.push_back({ {xMin, yTop, zMin}, currentCol });
                     sideV.push_back({ {xMax, yTop, zMin}, currentCol });
@@ -473,26 +571,94 @@ namespace Example
                     sideV.push_back({ {xMax, yTop, zMax}, currentCol });
                     sideV.push_back({ {xMin, yTop, zMax}, currentCol });
 
-                    float faceX = (xPos > 0) ? xMin : xMax;
+                    float faceX = isRight ? xMin : xMax;
                     sideV.push_back({ {faceX, yBottom, zMin}, yellow });
                     sideV.push_back({ {faceX, yTop, zMin}, darkGrey });
                     sideV.push_back({ {faceX, yTop, zMax}, darkGrey });
-                    sideV.push_back({ {faceX, yBottom, zMin}, darkGrey });
+                    sideV.push_back({ {faceX, yBottom, zMin}, yellow });
                     sideV.push_back({ {faceX, yTop, zMax}, darkGrey });
                     sideV.push_back({ {faceX, yBottom, zMax}, yellow });
                 }
             };
 
-        addDetailedSidewalk(roadW + sW);
-        addDetailedSidewalk(-(roadW + sW));
+        // ─────────────────────────────────────────────────────────────
+        // رصيف أفقي مبلط
+        // ─────────────────────────────────────────────────────────────
+        auto addHorizontalSidewalk = [&](float zPos, float xStart, float xEnd)
+            {
+                float zMin = zPos - sW;
+                float zMax = zPos + sW;
+                bool isFront = (zPos > 0);
+
+                for (float x = xStart; x < xEnd; x += tileL)
+                {
+                    glm::vec3 currentCol = ((int)((x - xStart) / tileL) % 2 == 0) ? lightGrey : lightGrey * 0.92f;
+                    float xMin = x;
+                    float xMax = std::min(x + tileL - 0.1f, xEnd);
+
+                    sideV.push_back({ {xMin, yTop, zMin}, currentCol });
+                    sideV.push_back({ {xMax, yTop, zMin}, currentCol });
+                    sideV.push_back({ {xMax, yTop, zMax}, currentCol });
+                    sideV.push_back({ {xMin, yTop, zMin}, currentCol });
+                    sideV.push_back({ {xMax, yTop, zMax}, currentCol });
+                    sideV.push_back({ {xMin, yTop, zMax}, currentCol });
+
+                    float faceZ = isFront ? zMin : zMax;
+                    sideV.push_back({ {xMin, yBottom, faceZ}, yellow });
+                    sideV.push_back({ {xMin, yTop, faceZ}, darkGrey });
+                    sideV.push_back({ {xMax, yTop, faceZ}, darkGrey });
+                    sideV.push_back({ {xMin, yBottom, faceZ}, yellow });
+                    sideV.push_back({ {xMax, yTop, faceZ}, darkGrey });
+                    sideV.push_back({ {xMax, yBottom, faceZ}, yellow });
+                }
+            };
+
+        // ─────────────────────────────────────────────────────────────
+        // ✅ الأرصفة المستقيمة (تبدأ من نهاية الزوايا)
+        // ─────────────────────────────────────────────────────────────
+        
+        // شمال/جنوب - تبدأ من cornerEnd
+        addVerticalSidewalk(roadW + sW, cornerEnd, roadLongNS);      // يمين-شمال
+        addVerticalSidewalk(roadW + sW, -roadLongNS, -cornerEnd);    // يمين-جنوب
+        addVerticalSidewalk(-(roadW + sW), cornerEnd, roadLongNS);   // يسار-شمال
+        addVerticalSidewalk(-(roadW + sW), -roadLongNS, -cornerEnd); // يسار-جنوب
+
+        // شرق/غرب - تبدأ من cornerEnd
+        addHorizontalSidewalk(roadW + sW, cornerEnd, roadLongEW);      // أمام-شرق
+        addHorizontalSidewalk(roadW + sW, -roadLongEW, -cornerEnd);    // أمام-غرب
+        addHorizontalSidewalk(-(roadW + sW), cornerEnd, roadLongEW);   // خلف-شرق
+        addHorizontalSidewalk(-(roadW + sW), -roadLongEW, -cornerEnd); // خلف-غرب
+
+        // ─────────────────────────────────────────────────────────────
+        // ✅ الزوايا الأربع (مربعات تصل الأرصفة ببعضها)
+        // ─────────────────────────────────────────────────────────────
+        
+        // شمال شرق: من (6, 6) إلى (9, 9)
+        addSidewalkRect(cornerStart, cornerEnd, cornerStart, cornerEnd, true, false, false, true);
+
+        // شمال غرب: من (-9, 6) إلى (-6, 9)
+        addSidewalkRect(-cornerEnd, -cornerStart, cornerStart, cornerEnd, false, true, false, true);
+
+        // جنوب شرق: من (6, -9) إلى (9, -6)
+        addSidewalkRect(cornerStart, cornerEnd, -cornerEnd, -cornerStart, true, false, true, false);
+
+        // جنوب غرب: من (-9, -9) إلى (-6, -6)
+        addSidewalkRect(-cornerEnd, -cornerStart, -cornerEnd, -cornerStart, false, true, true, false);
+
         sidewalk = BasicShape(sideV);
 
+        // ═══════════════════════════════════════════════════════════
+        // 12. خطوط الطريق
+        // ═══════════════════════════════════════════════════════════
         std::vector<BasicVertex> lineV;
         glm::vec3 lineCol = { 1.0f, 1.0f, 1.0f };
-        for (float z = -roadL; z < roadL; z += 10.0f)
+        float lW = 0.12f;
+        float lL = 3.5f;
+        float lineSpacing = 8.0f;
+        float lineStart = intersectSize + 2.0f;
+
+        for (float z = lineStart; z < roadLongNS - lL; z += lineSpacing)
         {
-            float lW = 0.15f;
-            float lL = 4.0f;
             lineV.push_back({ {-lW, 0.08f, z}, lineCol });
             lineV.push_back({ {lW, 0.08f, z}, lineCol });
             lineV.push_back({ {lW, 0.08f, z + lL}, lineCol });
@@ -500,7 +666,98 @@ namespace Example
             lineV.push_back({ {lW, 0.08f, z + lL}, lineCol });
             lineV.push_back({ {-lW, 0.08f, z + lL}, lineCol });
         }
+
+        for (float z = -roadLongNS + 3.0f; z < -lineStart; z += lineSpacing)
+        {
+            lineV.push_back({ {-lW, 0.08f, z}, lineCol });
+            lineV.push_back({ {lW, 0.08f, z}, lineCol });
+            lineV.push_back({ {lW, 0.08f, z + lL}, lineCol });
+            lineV.push_back({ {-lW, 0.08f, z}, lineCol });
+            lineV.push_back({ {lW, 0.08f, z + lL}, lineCol });
+            lineV.push_back({ {-lW, 0.08f, z + lL}, lineCol });
+        }
+
+        for (float x = lineStart; x < roadLongEW - lL; x += lineSpacing)
+        {
+            lineV.push_back({ {x, 0.08f, -lW}, lineCol });
+            lineV.push_back({ {x + lL, 0.08f, -lW}, lineCol });
+            lineV.push_back({ {x + lL, 0.08f, lW}, lineCol });
+            lineV.push_back({ {x, 0.08f, -lW}, lineCol });
+            lineV.push_back({ {x + lL, 0.08f, lW}, lineCol });
+            lineV.push_back({ {x, 0.08f, lW}, lineCol });
+        }
+
+        for (float x = -roadLongEW + 3.0f; x < -lineStart; x += lineSpacing)
+        {
+            lineV.push_back({ {x, 0.08f, -lW}, lineCol });
+            lineV.push_back({ {x + lL, 0.08f, -lW}, lineCol });
+            lineV.push_back({ {x + lL, 0.08f, lW}, lineCol });
+            lineV.push_back({ {x, 0.08f, -lW}, lineCol });
+            lineV.push_back({ {x + lL, 0.08f, lW}, lineCol });
+            lineV.push_back({ {x, 0.08f, lW}, lineCol });
+        }
+
+        glm::vec3 edgeCol = { 0.9f, 0.9f, 0.9f };
+        float edgeW = 0.08f;
+
+        lineV.push_back({ {roadW - edgeW, 0.06f, lineStart}, edgeCol });
+        lineV.push_back({ {roadW, 0.06f, lineStart}, edgeCol });
+        lineV.push_back({ {roadW, 0.06f, roadLongNS}, edgeCol });
+        lineV.push_back({ {roadW - edgeW, 0.06f, lineStart}, edgeCol });
+        lineV.push_back({ {roadW, 0.06f, roadLongNS}, edgeCol });
+        lineV.push_back({ {roadW - edgeW, 0.06f, roadLongNS}, edgeCol });
+
+        lineV.push_back({ {-roadW, 0.06f, lineStart}, edgeCol });
+        lineV.push_back({ {-roadW + edgeW, 0.06f, lineStart}, edgeCol });
+        lineV.push_back({ {-roadW + edgeW, 0.06f, roadLongNS}, edgeCol });
+        lineV.push_back({ {-roadW, 0.06f, lineStart}, edgeCol });
+        lineV.push_back({ {-roadW + edgeW, 0.06f, roadLongNS}, edgeCol });
+        lineV.push_back({ {-roadW, 0.06f, roadLongNS}, edgeCol });
+
+        lineV.push_back({ {roadW - edgeW, 0.06f, -roadLongNS}, edgeCol });
+        lineV.push_back({ {roadW, 0.06f, -roadLongNS}, edgeCol });
+        lineV.push_back({ {roadW, 0.06f, -lineStart}, edgeCol });
+        lineV.push_back({ {roadW - edgeW, 0.06f, -roadLongNS}, edgeCol });
+        lineV.push_back({ {roadW, 0.06f, -lineStart}, edgeCol });
+        lineV.push_back({ {roadW - edgeW, 0.06f, -lineStart}, edgeCol });
+
+        lineV.push_back({ {-roadW, 0.06f, -roadLongNS}, edgeCol });
+        lineV.push_back({ {-roadW + edgeW, 0.06f, -roadLongNS}, edgeCol });
+        lineV.push_back({ {-roadW + edgeW, 0.06f, -lineStart}, edgeCol });
+        lineV.push_back({ {-roadW, 0.06f, -roadLongNS}, edgeCol });
+        lineV.push_back({ {-roadW + edgeW, 0.06f, -lineStart}, edgeCol });
+        lineV.push_back({ {-roadW, 0.06f, -lineStart}, edgeCol });
+
+        lineV.push_back({ {lineStart, 0.06f, roadW - edgeW}, edgeCol });
+        lineV.push_back({ {roadLongEW, 0.06f, roadW - edgeW}, edgeCol });
+        lineV.push_back({ {roadLongEW, 0.06f, roadW}, edgeCol });
+        lineV.push_back({ {lineStart, 0.06f, roadW - edgeW}, edgeCol });
+        lineV.push_back({ {roadLongEW, 0.06f, roadW}, edgeCol });
+        lineV.push_back({ {lineStart, 0.06f, roadW}, edgeCol });
+
+        lineV.push_back({ {lineStart, 0.06f, -roadW}, edgeCol });
+        lineV.push_back({ {roadLongEW, 0.06f, -roadW}, edgeCol });
+        lineV.push_back({ {roadLongEW, 0.06f, -roadW + edgeW}, edgeCol });
+        lineV.push_back({ {lineStart, 0.06f, -roadW}, edgeCol });
+        lineV.push_back({ {roadLongEW, 0.06f, -roadW + edgeW}, edgeCol });
+        lineV.push_back({ {lineStart, 0.06f, -roadW + edgeW}, edgeCol });
+
+        lineV.push_back({ {-roadLongEW, 0.06f, roadW - edgeW}, edgeCol });
+        lineV.push_back({ {-lineStart, 0.06f, roadW - edgeW}, edgeCol });
+        lineV.push_back({ {-lineStart, 0.06f, roadW}, edgeCol });
+        lineV.push_back({ {-roadLongEW, 0.06f, roadW - edgeW}, edgeCol });
+        lineV.push_back({ {-lineStart, 0.06f, roadW}, edgeCol });
+        lineV.push_back({ {-roadLongEW, 0.06f, roadW}, edgeCol });
+
+        lineV.push_back({ {-roadLongEW, 0.06f, -roadW}, edgeCol });
+        lineV.push_back({ {-lineStart, 0.06f, -roadW}, edgeCol });
+        lineV.push_back({ {-lineStart, 0.06f, -roadW + edgeW}, edgeCol });
+        lineV.push_back({ {-roadLongEW, 0.06f, -roadW}, edgeCol });
+        lineV.push_back({ {-lineStart, 0.06f, -roadW + edgeW}, edgeCol });
+        lineV.push_back({ {-roadLongEW, 0.06f, -roadW + edgeW}, edgeCol });
+
         streetLines = BasicShape(lineV);
+
 
         std::cout << "✅ Showroom initialized with exterior walls and windows!" << std::endl;
 
@@ -590,14 +847,221 @@ namespace Example
         std::cout << "   Point Lights: " << lighting.pointLights.size() << std::endl;
         std::cout << "   Spot Lights: " << lighting.spotLights.size() << std::endl;
         std::cout << "   Press L to toggle lights" << std::endl;
+
+        std::cout << "✅ Showroom initialized!" << std::endl;
+        std::cout << "   Road width: " << roadW * 2 << std::endl;
+        std::cout << "   Intersection: " << intersectSize * 2 << " x " << intersectSize * 2 << std::endl;
+        std::cout << "   Sidewalk width: " << sidewalkWidth << std::endl;
+        std::cout << "   Corner: from " << cornerStart << " to " << cornerEnd << std::endl;
+
+        std::vector<BasicVertex> lampV;
+        glm::vec3 poleCol = { 0.2f, 0.2f, 0.22f };
+        glm::vec3 poleDark = { 0.12f, 0.12f, 0.14f };
+        glm::vec3 poleLight = { 0.3f, 0.3f, 0.32f };
+        glm::vec3 lampCol = { 1.0f, 0.95f, 0.75f };
+        glm::vec3 lampGlow = { 1.0f, 0.85f, 0.5f };
+        glm::vec3 armCol = { 0.18f, 0.18f, 0.2f };
+
+        float lampHeight = 6.0f;
+        float poleWidth = 0.1f;
+        float armLen = 1.8f;
+        float lampSize = 0.35f;
+        float lampSpacing = 18.0f;
+
+        auto addLampPost = [&](float x, float z, float armDirX, float armDirZ)
+            {
+                float pw = poleWidth;
+                float bw = 0.22f;
+                float bh = 0.25f;
+
+                // ═══ القاعدة ═══
+                lampV.push_back({ {x - bw, 0, z + bw}, poleDark });
+                lampV.push_back({ {x + bw, 0, z + bw}, poleDark });
+                lampV.push_back({ {x + bw, bh, z + bw}, poleLight });
+                lampV.push_back({ {x - bw, 0, z + bw}, poleDark });
+                lampV.push_back({ {x + bw, bh, z + bw}, poleLight });
+                lampV.push_back({ {x - bw, bh, z + bw}, poleLight });
+
+                lampV.push_back({ {x + bw, 0, z - bw}, poleDark });
+                lampV.push_back({ {x - bw, 0, z - bw}, poleDark });
+                lampV.push_back({ {x - bw, bh, z - bw}, poleLight });
+                lampV.push_back({ {x + bw, 0, z - bw}, poleDark });
+                lampV.push_back({ {x - bw, bh, z - bw}, poleLight });
+                lampV.push_back({ {x + bw, bh, z - bw}, poleLight });
+
+                lampV.push_back({ {x - bw, 0, z - bw}, poleDark });
+                lampV.push_back({ {x - bw, 0, z + bw}, poleDark });
+                lampV.push_back({ {x - bw, bh, z + bw}, poleLight });
+                lampV.push_back({ {x - bw, 0, z - bw}, poleDark });
+                lampV.push_back({ {x - bw, bh, z + bw}, poleLight });
+                lampV.push_back({ {x - bw, bh, z - bw}, poleLight });
+
+                lampV.push_back({ {x + bw, 0, z + bw}, poleDark });
+                lampV.push_back({ {x + bw, 0, z - bw}, poleDark });
+                lampV.push_back({ {x + bw, bh, z - bw}, poleLight });
+                lampV.push_back({ {x + bw, 0, z + bw}, poleDark });
+                lampV.push_back({ {x + bw, bh, z - bw}, poleLight });
+                lampV.push_back({ {x + bw, bh, z + bw}, poleLight });
+
+                lampV.push_back({ {x - bw, bh, z - bw}, poleLight });
+                lampV.push_back({ {x + bw, bh, z - bw}, poleLight });
+                lampV.push_back({ {x + bw, bh, z + bw}, poleLight });
+                lampV.push_back({ {x - bw, bh, z - bw}, poleLight });
+                lampV.push_back({ {x + bw, bh, z + bw}, poleLight });
+                lampV.push_back({ {x - bw, bh, z + bw}, poleLight });
+
+                // ═══ العمود ═══
+                float bodyBottom = bh;
+                float bodyTop = lampHeight;
+
+                lampV.push_back({ {x - pw, bodyBottom, z + pw}, poleCol });
+                lampV.push_back({ {x + pw, bodyBottom, z + pw}, poleCol });
+                lampV.push_back({ {x + pw, bodyTop, z + pw}, poleCol });
+                lampV.push_back({ {x - pw, bodyBottom, z + pw}, poleCol });
+                lampV.push_back({ {x + pw, bodyTop, z + pw}, poleCol });
+                lampV.push_back({ {x - pw, bodyTop, z + pw}, poleCol });
+
+                lampV.push_back({ {x + pw, bodyBottom, z - pw}, poleCol });
+                lampV.push_back({ {x - pw, bodyBottom, z - pw}, poleCol });
+                lampV.push_back({ {x - pw, bodyTop, z - pw}, poleCol });
+                lampV.push_back({ {x + pw, bodyBottom, z - pw}, poleCol });
+                lampV.push_back({ {x - pw, bodyTop, z - pw}, poleCol });
+                lampV.push_back({ {x + pw, bodyTop, z - pw}, poleCol });
+
+                lampV.push_back({ {x - pw, bodyBottom, z - pw}, poleDark });
+                lampV.push_back({ {x - pw, bodyBottom, z + pw}, poleDark });
+                lampV.push_back({ {x - pw, bodyTop, z + pw}, poleDark });
+                lampV.push_back({ {x - pw, bodyBottom, z - pw}, poleDark });
+                lampV.push_back({ {x - pw, bodyTop, z + pw}, poleDark });
+                lampV.push_back({ {x - pw, bodyTop, z - pw}, poleDark });
+
+                lampV.push_back({ {x + pw, bodyBottom, z + pw}, poleLight });
+                lampV.push_back({ {x + pw, bodyBottom, z - pw}, poleLight });
+                lampV.push_back({ {x + pw, bodyTop, z - pw}, poleLight });
+                lampV.push_back({ {x + pw, bodyBottom, z + pw}, poleLight });
+                lampV.push_back({ {x + pw, bodyTop, z - pw}, poleLight });
+                lampV.push_back({ {x + pw, bodyTop, z + pw}, poleLight });
+
+                // ═══ الذراع ═══
+                float armY = lampHeight - 0.05f;
+                float armH = 0.08f;
+                float armW = 0.06f;
+                float armEndX = x + armDirX * armLen;
+                float armEndZ = z + armDirZ * armLen;
+                float armEndY = armY - 0.4f;
+
+                lampV.push_back({ {x - armW, armY - armH, z - armW}, armCol });
+                lampV.push_back({ {x + armW, armY - armH, z + armW}, armCol });
+                lampV.push_back({ {armEndX + armW, armEndY - armH, armEndZ + armW}, armCol });
+                lampV.push_back({ {x - armW, armY - armH, z - armW}, armCol });
+                lampV.push_back({ {armEndX + armW, armEndY - armH, armEndZ + armW}, armCol });
+                lampV.push_back({ {armEndX - armW, armEndY - armH, armEndZ - armW}, armCol });
+
+                lampV.push_back({ {x - armW, armY + armH, z - armW}, armCol });
+                lampV.push_back({ {x + armW, armY + armH, z + armW}, armCol });
+                lampV.push_back({ {armEndX + armW, armEndY + armH, armEndZ + armW}, armCol });
+                lampV.push_back({ {x - armW, armY + armH, z - armW}, armCol });
+                lampV.push_back({ {armEndX + armW, armEndY + armH, armEndZ + armW}, armCol });
+                lampV.push_back({ {armEndX - armW, armEndY + armH, armEndZ - armW}, armCol });
+
+                // ═══ المصباح ═══
+                float lx = armEndX;
+                float lz = armEndZ;
+                float ly = armEndY - lampSize - 0.1f;
+                float ls = lampSize;
+
+                lampV.push_back({ {lx - ls, ly, lz + ls}, lampCol });
+                lampV.push_back({ {lx + ls, ly, lz + ls}, lampCol });
+                lampV.push_back({ {lx + ls, ly + ls * 1.5f, lz + ls}, lampGlow });
+                lampV.push_back({ {lx - ls, ly, lz + ls}, lampCol });
+                lampV.push_back({ {lx + ls, ly + ls * 1.5f, lz + ls}, lampGlow });
+                lampV.push_back({ {lx - ls, ly + ls * 1.5f, lz + ls}, lampGlow });
+
+                lampV.push_back({ {lx + ls, ly, lz - ls}, lampCol });
+                lampV.push_back({ {lx - ls, ly, lz - ls}, lampCol });
+                lampV.push_back({ {lx - ls, ly + ls * 1.5f, lz - ls}, lampGlow });
+                lampV.push_back({ {lx + ls, ly, lz - ls}, lampCol });
+                lampV.push_back({ {lx - ls, ly + ls * 1.5f, lz - ls}, lampGlow });
+                lampV.push_back({ {lx + ls, ly + ls * 1.5f, lz - ls}, lampGlow });
+
+                lampV.push_back({ {lx - ls, ly, lz - ls}, lampCol });
+                lampV.push_back({ {lx - ls, ly, lz + ls}, lampCol });
+                lampV.push_back({ {lx - ls, ly + ls * 1.5f, lz + ls}, lampGlow });
+                lampV.push_back({ {lx - ls, ly, lz - ls}, lampCol });
+                lampV.push_back({ {lx - ls, ly + ls * 1.5f, lz + ls}, lampGlow });
+                lampV.push_back({ {lx - ls, ly + ls * 1.5f, lz - ls}, lampGlow });
+
+                lampV.push_back({ {lx + ls, ly, lz + ls}, lampCol });
+                lampV.push_back({ {lx + ls, ly, lz - ls}, lampCol });
+                lampV.push_back({ {lx + ls, ly + ls * 1.5f, lz - ls}, lampGlow });
+                lampV.push_back({ {lx + ls, ly, lz + ls}, lampCol });
+                lampV.push_back({ {lx + ls, ly + ls * 1.5f, lz - ls}, lampGlow });
+                lampV.push_back({ {lx + ls, ly + ls * 1.5f, lz + ls}, lampGlow });
+
+                lampV.push_back({ {lx - ls, ly, lz - ls}, lampGlow });
+                lampV.push_back({ {lx + ls, ly, lz - ls}, lampGlow });
+                lampV.push_back({ {lx + ls, ly, lz + ls}, lampGlow });
+                lampV.push_back({ {lx - ls, ly, lz - ls}, lampGlow });
+                lampV.push_back({ {lx + ls, ly, lz + ls}, lampGlow });
+                lampV.push_back({ {lx - ls, ly, lz + ls}, lampGlow });
+
+                lampV.push_back({ {lx - ls, ly + ls * 1.5f, lz - ls}, armCol });
+                lampV.push_back({ {lx + ls, ly + ls * 1.5f, lz - ls}, armCol });
+                lampV.push_back({ {lx + ls, ly + ls * 1.5f, lz + ls}, armCol });
+                lampV.push_back({ {lx - ls, ly + ls * 1.5f, lz - ls}, armCol });
+                lampV.push_back({ {lx + ls, ly + ls * 1.5f, lz + ls}, armCol });
+                lampV.push_back({ {lx - ls, ly + ls * 1.5f, lz + ls}, armCol });
+            };
+
+        float sidewalkPosR = roadW + sW;
+        float sidewalkPosL = -(roadW + sW);
+
+        // شمال - يمين
+        for (float z = cornerEnd + 8; z < roadLongNS - 10; z += lampSpacing)
+            addLampPost(sidewalkPosR, z, -1, 0);
+
+        // شمال - يسار
+        for (float z = cornerEnd + 8; z < roadLongNS - 10; z += lampSpacing)
+            addLampPost(sidewalkPosL, z, 1, 0);
+
+        // جنوب - يمين
+        for (float z = -roadLongNS + 10; z < -cornerEnd - 8; z += lampSpacing)
+            addLampPost(sidewalkPosR, z, -1, 0);
+
+        // جنوب - يسار
+        for (float z = -roadLongNS + 10; z < -cornerEnd - 8; z += lampSpacing)
+            addLampPost(sidewalkPosL, z, 1, 0);
+
+        // شرق - أمام
+        for (float x = cornerEnd + 8; x < roadLongEW - 10; x += lampSpacing)
+            addLampPost(x, roadW + sW, 0, -1);
+
+        // شرق - خلف
+        for (float x = cornerEnd + 8; x < roadLongEW - 10; x += lampSpacing)
+            addLampPost(x, -(roadW + sW), 0, 1);
+
+        // غرب - أمام
+        for (float x = -roadLongEW + 10; x < -cornerEnd - 8; x += lampSpacing)
+            addLampPost(x, roadW + sW, 0, -1);
+
+        // غرب - خلف
+        for (float x = -roadLongEW + 10; x < -cornerEnd - 8; x += lampSpacing)
+            addLampPost(x, -(roadW + sW), 0, 1);
+
+        streetLamps = BasicShape(lampV);
+
+        std::cout << "   Street lamps added!" << std::endl;
+
     }
 
     void Showroom::renderAll(const glm::mat4& viewProj)
     {
+
         // ✅ تطبيق الإضاءة على الشيدر
         lighting.applyToShader(BasicShape::getShaderProgram());
 
         // رسم العناصر الصلبة
+
         outerGround.render(glm::mat4(1.0f), viewProj);
         ceiling.render(glm::mat4(1.0f), viewProj);
         exteriorWalls.render(glm::mat4(1.0f), viewProj);
@@ -607,10 +1071,11 @@ namespace Example
         streetAsphalt.render(glm::mat4(1.0f), viewProj);
         sidewalk.render(glm::mat4(1.0f), viewProj);
         streetLines.render(glm::mat4(1.0f), viewProj);
+        roundabout.render(glm::mat4(1.0f), viewProj);
+        streetLamps.render(glm::mat4(1.0f), viewProj);
 
         for (auto& r : rooms)
             r->draw(viewProj);
-
         // الزجاج الشفاف أخيراً
         windowGlass.render(glm::mat4(1.0f), viewProj, 0.3f);
     }
@@ -619,20 +1084,15 @@ namespace Example
     {
         lighting.toggleAllLights();
         std::cout << "💡 Lights toggled!" << std::endl;
+
     }
 
-    // ═══════════════════════════════════════════════════════════════════
-    // نظام التصادم الشامل
-    // ═══════════════════════════════════════════════════════════════════
     glm::vec3 Showroom::checkCollision(glm::vec3 currentPos, glm::vec3 nextPos)
     {
         float margin = 0.5f;
         float podiumMargin = 0.4f;
         float columnMargin = 0.3f;
 
-        // ─────────────────────────────────────────────────────────────
-        // 1. ✅ التصادم مع الجدران الخارجية
-        // ─────────────────────────────────────────────────────────────
         float extMinX = exteriorBounds.minX;
         float extMaxX = exteriorBounds.maxX;
         float extMinZ = exteriorBounds.minZ;
@@ -641,45 +1101,32 @@ namespace Example
         float doorRight = exteriorBounds.doorMaxX;
         float doorZ = exteriorBounds.doorZ;
 
-        // الجدار الأيسر (X = extMinX)
         if (nextPos.z > extMinZ && nextPos.z < extMaxZ)
         {
             if (nextPos.x < extMinX + margin)
                 nextPos.x = extMinX + margin;
-        }
-
-        // الجدار الأيمن (X = extMaxX)
-        if (nextPos.z > extMinZ && nextPos.z < extMaxZ)
-        {
             if (nextPos.x > extMaxX - margin)
                 nextPos.x = extMaxX - margin;
         }
 
-        // الجدار الخلفي (Z = extMinZ) - بدون باب
         if (nextPos.x > extMinX && nextPos.x < extMaxX)
         {
             if (nextPos.z < extMinZ + margin)
                 nextPos.z = extMinZ + margin;
         }
 
-        // الجدار الأمامي (Z = extMaxZ) - مع الباب الرئيسي
         if (nextPos.x > extMinX && nextPos.x < extMaxX)
         {
             bool outsideDoor = (nextPos.x < doorLeft || nextPos.x > doorRight);
             if (outsideDoor)
             {
-                // من الداخل للخارج
                 if (currentPos.z < doorZ && nextPos.z > doorZ - margin)
                     nextPos.z = doorZ - margin;
-                // من الخارج للداخل
                 else if (currentPos.z > doorZ && nextPos.z < doorZ + margin)
                     nextPos.z = doorZ + margin;
             }
         }
 
-        // ─────────────────────────────────────────────────────────────
-        // 2. التصادم مع الأعمدة
-        // ─────────────────────────────────────────────────────────────
         for (const auto& col : columnBounds)
         {
             float colXMin = col.xCenter - col.halfSize;
@@ -699,20 +1146,13 @@ namespace Example
 
                 float minDist = std::min({ distLeft, distRight, distFront, distBack });
 
-                if (minDist == distLeft)
-                    nextPos.x = colXMin - columnMargin;
-                else if (minDist == distRight)
-                    nextPos.x = colXMax + columnMargin;
-                else if (minDist == distFront)
-                    nextPos.z = colZMax + columnMargin;
-                else if (minDist == distBack)
-                    nextPos.z = colZMin - columnMargin;
+                if (minDist == distLeft) nextPos.x = colXMin - columnMargin;
+                else if (minDist == distRight) nextPos.x = colXMax + columnMargin;
+                else if (minDist == distFront) nextPos.z = colZMax + columnMargin;
+                else if (minDist == distBack) nextPos.z = colZMin - columnMargin;
             }
         }
 
-        // ─────────────────────────────────────────────────────────────
-        // 3. التصادم مع جدران الغرف والمنصات
-        // ─────────────────────────────────────────────────────────────
         for (auto& room : rooms)
         {
             float xMin = room->centerOffset.x - room->size;
@@ -724,10 +1164,6 @@ namespace Example
             float dL = room->centerOffset.x - doorHalfWidth;
             float dR = room->centerOffset.x + doorHalfWidth;
 
-            float roomDoorZ = room->doorAtMaxZ ? zMax : zMin;
-            float solidZ = room->doorAtMaxZ ? zMin : zMax;
-
-            // الجدار الأيسر
             if (nextPos.z > zMin && nextPos.z < zMax)
             {
                 if (currentPos.x <= xMin && nextPos.x > xMin - margin)
@@ -736,7 +1172,6 @@ namespace Example
                     nextPos.x = xMin + margin;
             }
 
-            // الجدار الأيمن
             if (nextPos.z > zMin && nextPos.z < zMax)
             {
                 if (currentPos.x >= xMax && nextPos.x < xMax + margin)
@@ -745,7 +1180,6 @@ namespace Example
                     nextPos.x = xMax - margin;
             }
 
-            // الجدار المصمت
             if (nextPos.x > xMin && nextPos.x < xMax)
             {
                 if (room->doorAtMaxZ)
@@ -764,7 +1198,6 @@ namespace Example
                 }
             }
 
-            // جدار الباب
             if (nextPos.x > xMin && nextPos.x < xMax)
             {
                 bool outsideDoorWidth = (nextPos.x < dL || nextPos.x > dR);
@@ -787,7 +1220,6 @@ namespace Example
                 }
             }
 
-            // التصادم مع المنصات
             for (const auto& podium : room->podiumBounds)
             {
                 float pXMin = podium.xCenter - podium.halfWidth;
@@ -807,14 +1239,10 @@ namespace Example
 
                     float minDist = std::min({ distLeft, distRight, distFront, distBack });
 
-                    if (minDist == distLeft)
-                        nextPos.x = pXMin - podiumMargin;
-                    else if (minDist == distRight)
-                        nextPos.x = pXMax + podiumMargin;
-                    else if (minDist == distFront)
-                        nextPos.z = pZMax + podiumMargin;
-                    else if (minDist == distBack)
-                        nextPos.z = pZMin - podiumMargin;
+                    if (minDist == distLeft) nextPos.x = pXMin - podiumMargin;
+                    else if (minDist == distRight) nextPos.x = pXMax + podiumMargin;
+                    else if (minDist == distFront) nextPos.z = pZMax + podiumMargin;
+                    else if (minDist == distBack) nextPos.z = pZMin - podiumMargin;
                 }
             }
         }
