@@ -2,6 +2,8 @@
 #include <iostream>
 #include <cmath>
 #include <algorithm>
+#include "SportsCar.hpp"
+#include "SUVCar.hpp" 
 
 namespace Example
 {
@@ -343,14 +345,35 @@ namespace Example
 // سيارة في غرفة Luxury (المنصة الوسطى - index 1) - لون أحمر
         rooms[0]->addCarToPodium(1, { 0.7f, 0.1f, 0.1f }, { 0.2f, 0.15f, 0.1f });
 
-        // سيارة في غرفة Electric (المنصة الوسطى) - لون أزرق
-        rooms[1]->addCarToPodium(1, { 0.1f, 0.3f, 0.7f }, { 0.1f, 0.1f, 0.15f });
+        //// سيارة في غرفة Electric (المنصة الوسطى) - لون أزرق
+        //rooms[1]->addCarToPodium(1, { 0.1f, 0.3f, 0.7f }, { 0.1f, 0.1f, 0.15f });
 
-        // سيارة في غرفة Sports (المنصة الوسطى) - لون أصفر
-        rooms[2]->addCarToPodium(1, { 0.9f, 0.7f, 0.1f }, { 0.1f, 0.08f, 0.05f });
+        //// سيارة في غرفة Sports (المنصة الوسطى) - لون أصفر
+        //rooms[2]->addCarToPodium(1, { 0.9f, 0.7f, 0.1f }, { 0.1f, 0.08f, 0.05f });
 
-        // سيارة في غرفة Family (المنصة الوسطى) - لون أبيض
-        rooms[3]->addCarToPodium(1, { 0.9f, 0.9f, 0.92f }, { 0.12f, 0.1f, 0.08f });
+        //// سيارة في غرفة Family (المنصة الوسطى) - لون أبيض
+        //rooms[3]->addCarToPodium(1, { 0.9f, 0.9f, 0.92f }, { 0.12f, 0.1f, 0.08f });
+
+        glm::vec3 sportsRoomCenter = rooms[2]->centerOffset;
+        sportsCarInRoom.create(
+            glm::vec3(sportsRoomCenter.x, 0.55f, sportsRoomCenter.z + 5.25f),
+            0.0f,
+            glm::vec3(0.95f, 0.75f, 0.1f)  // أصفر رياضي
+        );
+
+        glm::vec3 familyRoomCenter = rooms[3]->centerOffset;
+        suvCarInRoom.create(
+            glm::vec3(familyRoomCenter.x, 0.65f, familyRoomCenter.z + 5.25f),
+            0.0f,
+            glm::vec3(0.15f, 0.55f, 0.2f)  // أخضر عائلي
+        );
+
+        glm::vec3 electricRoomCenter = rooms[1]->centerOffset;
+        electricCarInRoom.create(
+            glm::vec3(electricRoomCenter.x, 0.55f, electricRoomCenter.z - 5.25f),
+            180.0f,
+            glm::vec3(0.1f, 0.35f, 0.75f)  // أزرق كهربائي
+        );
 
         std::cout << "✅ Cars added to showroom!" << std::endl;
         std::cout << "💡 Press E near a car to enter/exit" << std::endl;
@@ -1052,6 +1075,7 @@ namespace Example
 
         std::cout << "   Street lamps added!" << std::endl;
 
+
     }
 
     void Showroom::renderAll(const glm::mat4& viewProj)
@@ -1073,6 +1097,11 @@ namespace Example
         streetLines.render(glm::mat4(1.0f), viewProj);
         roundabout.render(glm::mat4(1.0f), viewProj);
         streetLamps.render(glm::mat4(1.0f), viewProj);
+
+        electricCarInRoom.render(viewProj);
+        sportsCarInRoom.render(viewProj);
+        suvCarInRoom.render(viewProj);
+
 
         for (auto& r : rooms)
             r->draw(viewProj);
