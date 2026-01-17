@@ -30,7 +30,7 @@ public:
     // ✅ لعرض رسالة التفاعل
     bool nearCar = false;
 
-    Application() : appCamera(glm::vec3(0.0f, 1.7f, 75.0f)), window(nullptr) {}
+    Application() : appCamera(glm::vec3(0.0f, 2.5f, 75.0f)), window(nullptr) {}
 
     void onInit()
     {
@@ -66,7 +66,7 @@ public:
             glm::vec3 oldPos = appCamera.Position;
             handleMovement(dt);
             appCamera.Position = showroom.checkCollision(oldPos, appCamera.Position);
-            appCamera.Position.y = 1.7f;
+            appCamera.Position.y = 2.5f;
 
             // فحص إذا كان قريب من سيارة
             Example::Car* nearbyCar = showroom.findNearestCar(appCamera.Position);

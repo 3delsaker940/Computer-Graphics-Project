@@ -23,8 +23,15 @@ namespace Example
         std::vector<Example::BasicShape> podiums;
         Example::BasicShape ceilingLight;
 
+        std::vector<Example::BasicShape> decorations;
+        std::vector<Example::BasicShape> exteriorDecor; // ✅ ديكور خارجي (واجهة الغرفة)
+
+        Example::BasicShape backWallWindowFrame;
+        Example::BasicShape backWallWindowGlass;
+        bool hasBackWallWindow = false;
+
     
-        float doorWidth = 5.0f;   // ✅ عرض فتحة الباب
+        float doorWidth = 7.0f;   // ✅ عرض فتحة الباب
         float doorHeight = 4.5f;  // ✅ ارتفاع فتحة الباب (نفس اللي عندك)
 
         glm::vec3 centerOffset;

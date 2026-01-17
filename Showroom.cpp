@@ -207,8 +207,8 @@ namespace Example
         float capH = 0.4f;
 
         float columnPositions[4][2] = {
-            {25.0f, 25.0f}, {-25.0f, 25.0f},
-            {25.0f, -25.0f}, {-25.0f, -25.0f}
+            {20.0f, 20.0f}, {-20.0f, 20.0f},
+            {20.0f, -20.0f}, {-20.0f, -20.0f}
         };
 
         columnBounds.clear();
@@ -324,16 +324,16 @@ namespace Example
         // 8. الغرف الأربع
         // ═══════════════════════════════════════════════════════════
         rooms.push_back(std::make_unique<Room>());
-        rooms.back()->create("Luxury", { 45, 0, -45 }, 15.0f, { 0.15f, 0.15f, 0.15f }, true);
+        rooms.back()->create("Luxury", { 45, 0, -45 }, 18.0f, { 0.15f, 0.15f, 0.15f }, true);
 
         rooms.push_back(std::make_unique<Room>());
-        rooms.back()->create("Electric", { -45, 0, -45 }, 15.0f, { 0.0f, 0.2f, 0.5f }, true);
+        rooms.back()->create("Electric", { -45, 0, -45 }, 18.0f, { 0.0f, 0.2f, 0.5f }, true);
 
         rooms.push_back(std::make_unique<Room>());
-        rooms.back()->create("Sports", { 45, 0, 45 }, 15.0f, { 0.6f, 0.0f, 0.0f }, false);
+        rooms.back()->create("Sports", { 45, 0, 45 }, 18.0f, { 0.6f, 0.0f, 0.0f }, false);
 
         rooms.push_back(std::make_unique<Room>());
-        rooms.back()->create("Family", { -45, 0, 45 }, 15.0f, { 0.0f, 0.5f, 0.0f }, false);
+        rooms.back()->create("Family", { -45, 0, 45 }, 18.0f, { 0.0f, 0.5f, 0.0f }, false);
 
 
         // ═══════════════════════════════════════════════════════════
