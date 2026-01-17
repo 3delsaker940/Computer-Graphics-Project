@@ -107,7 +107,7 @@
       <PreprocessorDefinitions>GLM_FORCE_CXX17;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\dependencies\GLFW-3.4\include;$(ProjectDir)dependencies\dependencies\glad\include;$(ProjectDir)dependencies\dependencies\glm-1.0.2\include;$(ProjectDir)dependencies\dependencies\stb\include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Predator\vcpkg;$(ProjectDir)dependencies\dependencies\GLFW-3.4\include;$(ProjectDir)dependencies\dependencies\glad\include;$(ProjectDir)dependencies\dependencies\glm-1.0.2\include;$(ProjectDir)dependencies\dependencies\stb\include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -124,6 +124,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\Predator\vcpkg;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -136,6 +137,7 @@
     <ClCompile Include="dependencies\dependencies\glad\src\glad.c" />
     <ClCompile Include="ElectricCar.cpp" />
     <ClCompile Include="Lighting.cpp" />
+    <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="Room.cpp" />
     <ClCompile Include="Showroom.cpp" />
     <ClCompile Include="SportsCar.cpp" />
@@ -156,6 +158,7 @@
     <ClInclude Include="include\shader-utils.hpp" />
     <ClInclude Include="include\textured-shape.hpp" />
     <ClInclude Include="Lighting.hpp" />
+    <ClInclude Include="ModelLoader.hpp" />
     <ClInclude Include="Room.hpp" />
     <ClInclude Include="Showroom.hpp" />
     <ClInclude Include="SportsCar.hpp" />
