@@ -256,6 +256,22 @@ namespace Example
         }
     }
 
+    void Room::addExistingCarToPodium(int podiumIndex, Example::Car* car)
+    {
+        if (podiumIndex < 0 || podiumIndex >= (int)podiumBounds.size())
+            return;
+
+        const auto& podium = podiumBounds[podiumIndex];
+
+        float podiumTopY = 0.25f;
+        glm::vec3 carPos = { podium.xCenter, podiumTopY - car->getGroundClearance(), podium.zCenter };
+
+        float carRotation = doorAtMaxZ ? 180.0f : 0.0f;
+        car->setPosition(carPos);
+
+        cars.push_back(std::unique_ptr<Car>(car));
+    }
+
     void Room::addCarToPodium(int podiumIndex, glm::vec3 carColor, glm::vec3 interiorColor)
     {
         if (podiumIndex < 0 || podiumIndex >= (int)podiumBounds.size())

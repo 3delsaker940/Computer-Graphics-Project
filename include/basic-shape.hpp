@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#include <string>
 
 namespace Example
 {
@@ -80,4 +81,6 @@ namespace Example
         verts.push_back({ p3, color, normal });
         verts.push_back({ p4, color, normal });
     }
+
+    void loadModelToShape(BasicShape& outShape, const std::string& path, glm::vec3 color);
 }

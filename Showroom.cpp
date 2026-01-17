@@ -352,6 +352,11 @@ namespace Example
         // سيارة في غرفة Family (المنصة الوسطى) - لون أبيض
         rooms[3]->addCarToPodium(1, { 0.9f, 0.9f, 0.92f }, { 0.12f, 0.1f, 0.08f });
 
+        Example::Car* modelCar = new Example::Car();
+        Example::loadModelToShape(modelCar->bodyShape, "assets/models/car1/Porsche.obj", { 1.0f, 1.0f, 1.0f });
+        modelCar->useBodyShape = true;   // ← مهم
+        rooms[0]->addExistingCarToPodium(2, modelCar);  // ← المنصة 2
+
         std::cout << "✅ Cars added to showroom!" << std::endl;
         std::cout << "💡 Press E near a car to enter/exit" << std::endl;
 
