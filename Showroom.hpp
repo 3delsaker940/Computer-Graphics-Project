@@ -1,9 +1,12 @@
 ﻿#pragma once
 #include "Room.hpp"
 #include "Car.hpp"
-#include "Lighting.hpp"  // ✅ جديد
+#include "Lighting.hpp"  
 #include <vector>
 #include <memory>
+#include "SportsCar.hpp"  
+#include "SUVCar.hpp" 
+#include "ElectricCar.hpp"
 
 namespace Example
 {
@@ -48,22 +51,21 @@ namespace Example
         //مشان الدوار
         Example::BasicShape roundabout;
 
+        SportsCar sportsCarInRoom;      // للغرفة الصفراء (Sports)
+        SUVCar suvCarInRoom;            // للغرفة الخضراء (Family)
+        ElectricCar electricCarInRoom;
+
 
     public:
-        // ✅ جديد: مدير الإضاءة (public للوصول إليه)
         LightingManager lighting;
 
         void init();
         void renderAll(const glm::mat4& viewProj);
         glm::vec3 checkCollision(glm::vec3 currentPos, glm::vec3 nextPos);
         Car* findNearestCar(glm::vec3 playerPos);
-
-        // ✅ جديد: تبديل الإضاءة
         void toggleLights();
-
         void update(float dt);
         bool toggleNearestRoomDoor(const glm::vec3& playerPos);
-
         glm::vec3 checkCollisionRadius(glm::vec3 currentPos, glm::vec3 nextPos, float radius);
     };
 }
