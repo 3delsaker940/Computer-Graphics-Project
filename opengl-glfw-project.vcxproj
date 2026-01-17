@@ -135,20 +135,25 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Car.cpp" />
     <ClCompile Include="dependencies\dependencies\glad\src\glad.c" />
+    <ClCompile Include="ElectricCar.cpp" />
     <ClCompile Include="Lighting.cpp" />
     <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="Room.cpp" />
     <ClCompile Include="Showroom.cpp" />
+    <ClCompile Include="SportsCar.cpp" />
     <ClCompile Include="src\basic-shape.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\shader-utils.cpp" />
     <ClCompile Include="src\textured-shape.cpp" />
     <ClCompile Include="street.cpp" />
     <ClCompile Include="street.hpp" />
+    <ClCompile Include="SUVCar.cpp" />
+    <ClCompile Include="SUVCar.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="Car.hpp" />
+    <ClInclude Include="ElectricCar.hpp" />
     <ClInclude Include="include\basic-shape.hpp" />
     <ClInclude Include="include\shader-utils.hpp" />
     <ClInclude Include="include\textured-shape.hpp" />
@@ -156,6 +161,7 @@
     <ClInclude Include="ModelLoader.hpp" />
     <ClInclude Include="Room.hpp" />
     <ClInclude Include="Showroom.hpp" />
+    <ClInclude Include="SportsCar.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

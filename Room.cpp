@@ -36,6 +36,46 @@ namespace Example
                 verts.push_back({ p4, col, normal });
             };
 
+        auto addQuadLocal = [&](std::vector<BasicVertex>& v,
+            glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4,
+            glm::vec3 col)
+            {
+                v.push_back({ addPos(p1), col });
+                v.push_back({ addPos(p2), col });
+                v.push_back({ addPos(p3), col });
+                v.push_back({ addPos(p1), col });
+                v.push_back({ addPos(p3), col });
+                v.push_back({ addPos(p4), col });
+            };
+
+        auto addBoxLocal = [&](std::vector<BasicVertex>& v,
+            glm::vec3 mn, glm::vec3 mx, glm::vec3 col)
+            {
+                // 6 faces box using quads (local coords)
+                glm::vec3 a(mn.x, mn.y, mn.z);
+                glm::vec3 b(mx.x, mn.y, mn.z);
+                glm::vec3 c(mx.x, mx.y, mn.z);
+                glm::vec3 d(mn.x, mx.y, mn.z);
+
+                glm::vec3 e(mn.x, mn.y, mx.z);
+                glm::vec3 f(mx.x, mn.y, mx.z);
+                glm::vec3 g(mx.x, mx.y, mx.z);
+                glm::vec3 h(mn.x, mx.y, mx.z);
+
+                // Z- face
+                addQuadLocal(v, a, b, c, d, col);
+                // Z+ face
+                addQuadLocal(v, f, e, h, g, col);
+                // X- face
+                addQuadLocal(v, e, a, d, h, col);
+                // X+ face
+                addQuadLocal(v, b, f, g, c, col);
+                // Y+ face
+                addQuadLocal(v, d, c, g, h, col);
+                // Y- face
+                addQuadLocal(v, e, f, b, a, col);
+            };
+
         // ═══════════════════════════════════════════════════════════
         // 1. الأرضية
         // ═══════════════════════════════════════════════════════════
@@ -53,10 +93,10 @@ namespace Example
         // ═══════════════════════════════════════════════════════════
         // 2. المنصات الثلاث 🚗🚗🚗
         // ═══════════════════════════════════════════════════════════
-        float pW = 3.5f;      // نصف عرض المنصة (X)
-        float pD = 4.5f;      // نصف عمق المنصة (Z)
-        float pH = 0.25f;     // ارتفاع المنصة
-        float spacing = 9.0f; // المسافة بين مراكز المنصات
+        float pW = 4.2f;      // نصف عرض المنصة (X)
+        float pD = 5.2f;      // نصف عمق المنصة (Z)
+        float pH = 0.39f;     // ارتفاع المنصة
+        float spacing = 10.5f; // المسافة بين مراكز المنصات
 
         // موقع المنصات على محور Z (بعيداً عن الباب)
         float pZ = isDoorAtMaxZ ? -size * 0.35f : size * 0.35f;
@@ -226,21 +266,330 @@ namespace Example
         float openAngle = doorAtMaxZ ? -90.0f : 90.0f;
         doorTargetAngle = doorOpen ? openAngle : 0.0f;
         doorAngle = doorTargetAngle;
+
+        
+
+        // ===============================
+ // Exterior facade v2 (NO z-fighting, NO covering the door hole)
+ // ===============================
+        exteriorDecor.clear();
+
+        std::vector<BasicVertex> panelV, frameV, signV, accentV;
+
+        // مكان جدار الباب
+        float doorPlaneZ = (doorAtMaxZ ? size : -size);
+        float faceSign = (doorAtMaxZ ? 1.0f : -1.0f);
+
+        // نرسم لوحة الواجهة خلف الإطار قليلاً (لتجنب z-fighting)
+        // والإطار يكون أقرب للكاميرا (أمامي أكثر)
+        float panelZ = doorPlaneZ + faceSign * 0.10f;
+        float frameCenterZ = doorPlaneZ + faceSign * 0.18f;
+
+        // فتحة الباب
+        float DW = this->doorWidth;     // 5.0 عادة
+        float DH = this->doorHeight;    // 4.5 عادة
+        float sideGap = 0.08f;          // فراغ بسيط حول الفتحة
+        float topY = 6.8f;              // ارتفاع الواجهة
+
+        // ألوان
+        glm::vec3 baseCol = { 0.10f, 0.10f, 0.12f };
+        glm::vec3 accent = { 1.0f, 1.0f, 1.0f };
+
+        if (name == "Luxury")   accent = { 0.90f, 0.75f, 0.25f };
+        if (name == "Electric") accent = { 0.20f, 0.90f, 1.00f };
+        if (name == "Sports")   accent = { 0.90f, 0.12f, 0.12f };
+        if (name == "Family")   accent = { 0.95f, 0.80f, 0.55f };
+
+        // ---- Panels حول فتحة الباب (بدون تغطية الفتحة) ----
+
+        // يسار الفتحة
+        addQuadLocal(panelV,
+            { -size + 0.02f, 0.0f, panelZ },
+            { -DW / 2 - sideGap, 0.0f, panelZ },
+            { -DW / 2 - sideGap, topY, panelZ },
+            { -size + 0.02f, topY, panelZ },
+            baseCol);
+
+        // يمين الفتحة
+        addQuadLocal(panelV,
+            { DW / 2 + sideGap, 0.0f, panelZ },
+            { size - 0.02f, 0.0f, panelZ },
+            { size - 0.02f, topY, panelZ },
+            { DW / 2 + sideGap, topY, panelZ },
+            baseCol);
+
+        // فوق الفتحة
+        addQuadLocal(panelV,
+            { -DW / 2 - sideGap, DH, panelZ },
+            { DW / 2 + sideGap, DH, panelZ },
+            { DW / 2 + sideGap, topY, panelZ },
+            { -DW / 2 - sideGap, topY, panelZ },
+            baseCol * 1.05f);
+
+        // ---- Frame 3D حول الباب ----
+        float frameThickness = 0.25f;
+        float z1 = frameCenterZ - faceSign * 0.08f;
+        float z2 = frameCenterZ + faceSign * 0.22f;
+
+        // يسار الإطار
+        addBoxLocal(frameV,
+            { -DW / 2 - frameThickness, 0.0f, z1 },
+            { -DW / 2,                 DH,   z2 },
+            accent * 0.85f);
+
+        // يمين الإطار
+        addBoxLocal(frameV,
+            { DW / 2,                 0.0f, z1 },
+            { DW / 2 + frameThickness, DH,   z2 },
+            accent * 0.85f);
+
+        // أعلى الإطار
+        addBoxLocal(frameV,
+            { -DW / 2 - frameThickness, DH, z1 },
+            { DW / 2 + frameThickness, DH + frameThickness, z2 },
+            accent);
+
+        // ---- Sign فوق الباب ----
+        float signH1 = topY + 0.10f;
+        float signH2 = topY + 0.90f;
+        float signPad = 1.2f;
+
+        float signZ = frameCenterZ + faceSign * 0.03f;
+
+        addQuadLocal(signV,
+            { -DW / 2 - signPad, signH1, signZ },
+            { DW / 2 + signPad, signH1, signZ },
+            { DW / 2 + signPad, signH2, signZ },
+            { -DW / 2 - signPad, signH2, signZ },
+            accent * 0.55f);
+
+        // ---- Accent بسيط لكل صالة (بدون تخريب الفتحة) ----
+        if (name == "Electric")
+        {
+            // شريطان Neon عموديان على الطرفين
+            float w = 0.14f;
+            float xEdge = size - 0.30f;
+            addQuadLocal(accentV, { xEdge - w, 0.4f, panelZ + faceSign * 0.02f }, { xEdge, 0.4f, panelZ + faceSign * 0.02f },
+                { xEdge, topY - 0.2f, panelZ + faceSign * 0.02f }, { xEdge - w, topY - 0.2f, panelZ + faceSign * 0.02f }, accent);
+
+            addQuadLocal(accentV, { -xEdge, 0.4f, panelZ + faceSign * 0.02f }, { -xEdge + w, 0.4f, panelZ + faceSign * 0.02f },
+                { -xEdge + w, topY - 0.2f, panelZ + faceSign * 0.02f }, { -xEdge, topY - 0.2f, panelZ + faceSign * 0.02f }, accent);
+        }
+        else if (name == "Sports")
+        {
+            // خطوط مائلة على اللوحة اليسرى فقط
+            for (int i = 0; i < 3; i++)
+            {
+                float x = -size + 1.8f + i * 1.1f;
+                addQuadLocal(accentV,
+                    { x, 0.8f, panelZ + faceSign * 0.02f },
+                    { x + 0.35f, 0.8f, panelZ + faceSign * 0.02f },
+                    { x + 2.1f, 5.8f, panelZ + faceSign * 0.02f },
+                    { x + 1.7f, 5.8f, panelZ + faceSign * 0.02f },
+                    accent * 0.9f);
+            }
+        }
+        else if (name == "Family")
+        {
+            // شريط أفقي دافئ فوق لوحة الاسم
+            addQuadLocal(accentV,
+                { -6.5f, topY + 0.95f, signZ },
+                { 6.5f, topY + 0.95f, signZ },
+                { 6.5f, topY + 1.10f, signZ },
+                { -6.5f, topY + 1.10f, signZ },
+                accent * 0.7f);
+        }
+
+        // خزّن الأشكال
+        exteriorDecor.emplace_back(panelV);
+        exteriorDecor.emplace_back(frameV);
+        exteriorDecor.emplace_back(signV);
+        exteriorDecor.emplace_back(accentV);
+
+
+        // ===============================
+// Decorations (simple per room)
+// ===============================
+        decorations.clear();
+
+        auto addQuad = [&](std::vector<BasicVertex>& v,
+            glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 d,
+            glm::vec3 col)
+            {
+                v.push_back({ a, col });
+                v.push_back({ b, col });
+                v.push_back({ c, col });
+                v.push_back({ a, col });
+                v.push_back({ c, col });
+                v.push_back({ d, col });
+            };
+
+        // ديكور حسب نوع الصالة
+        if (roomName == "Luxury")
+        {
+            // سجادة وسطية داكنة + إطار ذهبي
+            std::vector<BasicVertex> rugV, goldV;
+            float y = 0.02f;
+            float rug = size * 0.75f;
+
+            glm::vec3 rugCol = { 0.08f, 0.08f, 0.10f };
+            glm::vec3 goldCol = { 0.9f, 0.75f, 0.25f };
+
+            addQuad(rugV, addPos({ -rug, y, -rug }), addPos({ rug, y, -rug }),
+                addPos({ rug, y,  rug }), addPos({ -rug, y,  rug }), rugCol);
+
+            float bw = 0.35f;
+            // إطار ذهبي (4 شرائط)
+            addQuad(goldV, addPos({ -rug, y + 0.001f, -rug }), addPos({ rug, y + 0.001f, -rug }),
+                addPos({ rug, y + 0.001f, -rug + bw }), addPos({ -rug, y + 0.001f, -rug + bw }), goldCol);
+
+            addQuad(goldV, addPos({ -rug, y + 0.001f, rug - bw }), addPos({ rug, y + 0.001f, rug - bw }),
+                addPos({ rug, y + 0.001f, rug }), addPos({ -rug, y + 0.001f, rug }), goldCol);
+
+            addQuad(goldV, addPos({ -rug, y + 0.001f, -rug }), addPos({ -rug + bw, y + 0.001f, -rug }),
+                addPos({ -rug + bw, y + 0.001f, rug }), addPos({ -rug, y + 0.001f, rug }), goldCol);
+
+            addQuad(goldV, addPos({ rug - bw, y + 0.001f, -rug }), addPos({ rug, y + 0.001f, -rug }),
+                addPos({ rug, y + 0.001f, rug }), addPos({ rug - bw, y + 0.001f, rug }), goldCol);
+
+            decorations.emplace_back(rugV);
+            decorations.emplace_back(goldV);
+        }
+        else if (roomName == "Electric")
+        {
+            // خطوط نيون على الأرض (سماوي/أزرق)
+            std::vector<BasicVertex> neonV;
+            float y = 0.03f;
+            float lineW = 0.18f;
+            glm::vec3 neon = { 0.2f, 0.9f, 1.0f };
+
+            float edge = size * 0.90f;
+
+            // خطين طوليين
+            addQuad(neonV, addPos({ -edge, y, -edge }), addPos({ -edge + lineW, y, -edge }),
+                addPos({ -edge + lineW, y, edge }), addPos({ -edge, y, edge }), neon);
+
+            addQuad(neonV, addPos({ edge - lineW, y, -edge }), addPos({ edge, y, -edge }),
+                addPos({ edge, y, edge }), addPos({ edge - lineW, y, edge }), neon);
+
+            // خطين عرضيين
+            addQuad(neonV, addPos({ -edge, y, -edge }), addPos({ edge, y, -edge }),
+                addPos({ edge, y, -edge + lineW }), addPos({ -edge, y, -edge + lineW }), neon);
+
+            addQuad(neonV, addPos({ -edge, y, edge - lineW }), addPos({ edge, y, edge - lineW }),
+                addPos({ edge, y, edge }), addPos({ -edge, y, edge }), neon);
+
+            decorations.emplace_back(neonV);
+        }
+        else if (roomName == "Sports")
+        {
+            // شريط أحمر باتجاه المنصات + بانر على الجدار
+            std::vector<BasicVertex> stripeV, bannerV;
+            float y = 0.02f;
+            glm::vec3 red = { 0.85f, 0.1f, 0.1f };
+            glm::vec3 banner = { 0.08f, 0.08f, 0.08f };
+
+            // شريط أرضي من الباب للداخل
+            float sW = 2.0f;
+            addQuad(stripeV,
+                addPos({ -sW, y,  size * 0.95f }),
+                addPos({ sW, y,  size * 0.95f }),
+                addPos({ sW, y, -size * 0.95f }),
+                addPos({ -sW, y, -size * 0.95f }), red);
+
+            // بانر مستطيل على جدار جانبي (قريب من الأعلى)
+            float by1 = 4.2f, by2 = 6.2f;
+            addQuad(bannerV,
+                addPos({ -size + 0.02f, by1, -4.0f }),
+                addPos({ -size + 0.02f, by1,  4.0f }),
+                addPos({ -size + 0.02f, by2,  4.0f }),
+                addPos({ -size + 0.02f, by2, -4.0f }), banner);
+
+            decorations.emplace_back(stripeV);
+            decorations.emplace_back(bannerV);
+        }
+        else if (roomName == "Family")
+        {
+            // Family: سجادة دافئة + كنبة بسيطة + لوحات حائط
+            std::vector<BasicVertex> rugV, sofaV, framesV;
+            float y = 0.02f;
+
+            glm::vec3 rugCol = { 0.60f, 0.50f, 0.40f };     // بني دافئ
+            glm::vec3 sofaCol = { 0.20f, 0.20f, 0.22f };    // رمادي غامق
+            glm::vec3 frameCol = { 0.85f, 0.85f, 0.88f };   // إطار فاتح
+            glm::vec3 picCol = { 0.20f, 0.45f, 0.60f };     // لوحة ملونة
+
+            // سجادة وسطية
+            float rug = size * 0.60f;
+            addQuadLocal(rugV,
+                { -rug, y, -rug }, { rug, y, -rug }, { rug, y, rug }, { -rug, y, rug },
+                rugCol);
+
+            // كنبة على الجدار الأيسر (داخل الغرفة) - صندوق بسيط
+            float sx1 = -size + 0.8f;
+            float sx2 = -size + 2.8f;
+            float sz1 = -10.5f;
+            float sz2 = -4.5f;
+            float sy1 = 0.0f;
+            float sy2 = 1.0f;
+
+            addBoxLocal(sofaV, { sx1, sy1, sz1 }, { sx2, sy2, sz2 }, sofaCol);
+
+            // لوحات حائط (3 إطارات) على الجدار الأيمن
+            float wx = size - 0.05f; // قرب الجدار
+            float by1 = 3.2f, by2 = 4.2f;
+
+            for (int i = 0; i < 3; i++)
+            {
+                float wz1 = -4.0f + i * 3.0f;
+                float wz2 = wz1 + 2.0f;
+
+                // إطار
+                addQuadLocal(framesV,
+                    { wx, by1, wz1 }, { wx, by1, wz2 }, { wx, by2, wz2 }, { wx, by2, wz1 },
+                    frameCol);
+
+                // داخل الإطار (الصورة)
+                addQuadLocal(framesV,
+                    { wx - 0.01f, by1 + 0.15f, wz1 + 0.15f },
+                    { wx - 0.01f, by1 + 0.15f, wz2 - 0.15f },
+                    { wx - 0.01f, by2 - 0.15f, wz2 - 0.15f },
+                    { wx - 0.01f, by2 - 0.15f, wz1 + 0.15f },
+                    picCol * (0.8f + 0.1f * i));
+            }
+
+            decorations.emplace_back(rugV);
+            decorations.emplace_back(sofaV);
+            decorations.emplace_back(framesV);
+        }
     }
+
+
 
     void Room::draw(const glm::mat4& viewProj)
     {
         floor.render(glm::mat4(1.0f), viewProj);
         walls.render(glm::mat4(1.0f), viewProj);
 
+        // ✅ رسم واجهة خارجية (على جدار الباب)
+        for (auto& ext : exteriorDecor)
+            ext.render(glm::mat4(1.0f), viewProj);
+
+        
         for (auto& podium : podiums)
         {
             podium.render(glm::mat4(1.0f), viewProj);
         }
 
+        for (auto& deco : decorations)
+        {
+            deco.render(glm::mat4(1.0f), viewProj);
+        }
+
         // رسم الباب (لوح متحرك)
         float doorZLocal = doorAtMaxZ ? size : -size;
-        glm::vec3 hingeWorld = centerOffset + glm::vec3(-this->doorWidth / 2.0f, 0.0f, doorZLocal);
+        float faceSign = doorAtMaxZ ? 1.0f : -1.0f;
+        glm::vec3 hingeWorld = centerOffset + glm::vec3(-this->doorWidth / 2.0f, 0.0f, doorZLocal + faceSign * 0.03f);
 
         glm::mat4 doorModel(1.0f);
         doorModel = glm::translate(doorModel, hingeWorld);

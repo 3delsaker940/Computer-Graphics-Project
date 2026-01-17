@@ -923,7 +923,7 @@ namespace Example
     glm::vec3 Car::getDriverSeatPosition() const
     {
         float driverLocalX = -0.35f;
-        float driverLocalY = groundClearance + 0.9f;
+        float driverLocalY = groundClearance + 1.2f;
         float driverLocalZ = -width * 0.25f;
 
         float rad = glm::radians(rotation);
