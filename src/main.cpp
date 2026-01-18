@@ -55,10 +55,10 @@ public:
         Example::BasicShape::compileShapeShader();
         showroom.init();
 
-        GLuint grassTex = loadTexture(R"(C:\Projects\Computer-Graphics-Project\resources\photos\grass.png)");
+        GLuint grassTex = loadTexture(R"(resources\photos\grass.png)");
         grassField.initGrassField(grassTex, 200.0f, 0.3f);
-        GLuint treeTexMini = loadTexture(R"(C:\Projects\Computer-Graphics-Project\resources\photos\mini-tree.png)");
-        GLuint treeTexHuge = loadTexture(R"(C:\Projects\Computer-Graphics-Project\resources\photos\huge-tree.png)");
+        GLuint treeTexMini = loadTexture(R"(resources\photos\mini-tree.png)");
+        GLuint treeTexHuge = loadTexture(R"(resources\photos\huge-tree.png)");
         treeField.initTrees(treeTexMini, treeTexHuge);
 
         std::cout << "Application Initialized. ESC to Exit." << std::endl;
