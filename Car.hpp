@@ -108,6 +108,8 @@ namespace Example
 
         
 
+        BasicShape bodyShape;
+        bool useBodyShape = false;
         
 
         // تهيئة السيارة

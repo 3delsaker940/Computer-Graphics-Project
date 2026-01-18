@@ -876,6 +876,11 @@ namespace Example
         model = glm::translate(model, position);
         model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
 
+        if (useBodyShape) {
+            bodyShape.render(model, viewProj);
+            return;
+        }
+
         bodyMain.render(model, viewProj);
         bodyHood.render(model, viewProj);
         bodyTrunk.render(model, viewProj);
