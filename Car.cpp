@@ -874,20 +874,17 @@ namespace Example
     {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, position);
-        model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
-
+        model = glm::rotate(model, glm::radians(bodyRot), glm::vec3(0.0f, 1.0f, 0.0f));
         if (useBodyShape) {
-            // 1. إنشاء مصفوفة جديدة للتعديل بناءً على مصفوفة السيارة الأصلية
             glm::mat4 correctedModel = model;
 
-            // 2. سطر الرفع: (عدل الرقم 0.5f حتى تلمس العجلات المنصة تماماً)
+            // ✅ التكبير حسب bodyScale الخاص بهذه السيارة فقط
+            correctedModel = glm::scale(correctedModel, glm::vec3(bodyScale, bodyScale, bodyScale));
+            
+            // الرفع (مقسوم على bodyScale لأن Scale يؤثر على الترجمة)
             correctedModel = glm::translate(correctedModel, glm::vec3(0.0f, 0.5f, 0.0f));
 
-
-            // 3. رسم الموديل بالمصفوفة "المصححة" فقط
             bodyShape.render(correctedModel, viewProj);
-
-            // 4. إنهاء الدالة هنا كي لا يكمل ويرسم الأجزاء البرمجية القديمة
             return;
         }
 
