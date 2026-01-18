@@ -377,9 +377,76 @@ namespace Example
         );
 
         Example::Car* modelCar = new Example::Car();
-        Example::loadModelToShape(modelCar->bodyShape, "assets/models/car1/Porsche.obj", { 1.0f, 1.0f, 1.0f });
+        Example::loadModelToShape(modelCar->bodyShape, "assets/models/Porsche.glb", { 1.0f, 1.0f, 1.0f });
         modelCar->useBodyShape = true;   // ← مهم
-        rooms[0]->addExistingCarToPodium(2, modelCar);  // ← المنصة 2
+        modelCar->bodyScale = 1.0f;  // ✅ كبّرها هنا (2x = ضعف الحجم)
+        modelCar->bodyRot = 180.0f;
+        rooms[2]->addExistingCarToPodium(0, modelCar);  // ← المنصة 2
+
+
+        Example::Car* modelCar1 = new Example::Car();
+        Example::loadModelToShape(modelCar1->bodyShape, "assets/models/Dodge.glb", { 1.0f, 1.0f, 1.0f });
+        modelCar1->useBodyShape = true;   // ← 
+        // موقع وحجم الموديل
+        modelCar1->bodyScale = 1.6f;  // ✅ كبّرها هنا (2x = ضعف الحجم)
+        modelCar1->bodyRot = 180.0f;
+
+        rooms[2]->addExistingCarToPodium(2, modelCar1);  // ← المنصة 2
+
+
+        Example::Car* modelCar2 = new Example::Car();
+        Example::loadModelToShape(modelCar2->bodyShape, "assets/models/Cadillac.glb", { 1.0f, 1.0f, 1.0f });
+        modelCar2->useBodyShape = true;   // ← 
+        // موقع وحجم الموديل
+        modelCar2->bodyScale = 1.0f;  // ✅ كبّرها هنا (2x = ضعف الحجم)
+        modelCar2->bodyRot = 0.0f;
+
+        rooms[0]->addExistingCarToPodium(0, modelCar2);  // ← المنصة 2
+
+        Example::Car* modelCar7 = new Example::Car();
+        Example::loadModelToShape(modelCar7->bodyShape, "assets/models/luxury.glb", { 1.0f, 1.0f, 1.0f });
+        modelCar7->useBodyShape = true;   // ← 
+        // موقع وحجم الموديل
+        modelCar7->bodyScale = 0.25f;  // ✅ كبّرها هنا (2x = ضعف الحجم)
+        modelCar7->bodyRot = 180.0f;
+
+        rooms[0]->addExistingCarToPodium(2, modelCar7);  // ← المنصة 2
+
+        Example::Car* modelCar3 = new Example::Car();
+        Example::loadModelToShape(modelCar3->bodyShape, "assets/models/classic.glb", { 1.0f, 1.0f, 1.0f });
+        modelCar3->useBodyShape = true;   // ← 
+        // موقع وحجم الموديل
+        modelCar3->bodyScale = 1.0f;  // ✅ كبّرها هنا (2x = ضعف الحجم)
+        modelCar3->bodyRot = 180.0f;
+
+        rooms[3]->addExistingCarToPodium(2, modelCar3);  // ← المنصة 2
+
+        Example::Car* modelCar4 = new Example::Car();
+        Example::loadModelToShape(modelCar4->bodyShape, "assets/models/ford_classic.glb", { 1.0f, 1.0f, 1.0f });
+        modelCar4->useBodyShape = true;   // ← 
+        // موقع وحجم الموديل
+        modelCar4->bodyScale = 1.3f;  // ✅ كبّرها هنا (2x = ضعف الحجم)
+        modelCar4->bodyRot = -90.0f;
+
+        rooms[3]->addExistingCarToPodium(0, modelCar4);  // ← المنصة 2
+
+        Example::Car* modelCar5 = new Example::Car();
+        Example::loadModelToShape(modelCar5->bodyShape, "assets/models/electric.glb", { 1.0f, 1.0f, 1.0f });
+        modelCar5->useBodyShape = true;   // ← 
+        // موقع وحجم الموديل
+        modelCar5->bodyScale = 0.02f;  // ✅ كبّرها هنا (2x = ضعف الحجم)
+        modelCar5->bodyRot = 0.0f;
+
+        rooms[1]->addExistingCarToPodium(0, modelCar5);  // ← المنصة 2
+
+        Example::Car* modelCar6 = new Example::Car();
+        Example::loadModelToShape(modelCar6->bodyShape, "assets/models/electric2.glb", { 1.0f, 1.0f, 1.0f });
+        modelCar6->useBodyShape = true;   // ← 
+        // موقع وحجم الموديل
+        modelCar6->bodyScale = 0.02f;  // ✅ كبّرها هنا (2x = ضعف الحجم)
+        modelCar6->bodyRot = 0.0f;
+
+        rooms[1]->addExistingCarToPodium(2, modelCar6);  // ← المنصة 2
 
         std::cout << "✅ Cars added to showroom!" << std::endl;
         std::cout << "💡 Press E near a car to enter/exit" << std::endl;
