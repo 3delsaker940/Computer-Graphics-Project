@@ -10,6 +10,7 @@
 #include "basic-shape.hpp"
 #include "textured-shape.hpp"
 #include "../Camera.hpp"
+#include "../Audio.hpp"
 #include "../Showroom.hpp"
 #include "../Car.hpp"
 #include "../grass.hpp"
@@ -195,6 +196,7 @@ int main() {
 
     glEnable(GL_DEPTH_TEST);
     app.onInit();
+    audioInit();
 
     while (!glfwWindowShouldClose(app.window)) {
         app.onUpdate();

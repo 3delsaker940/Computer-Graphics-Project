@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "SportsCar.hpp"
 #include "SUVCar.hpp" 
+extern void audioPlay(const char* file);
 
 namespace Example
 {
@@ -1522,6 +1523,11 @@ namespace Example
         if (best && bestDist < 8.0f)
         {
             best->toggleDoor();
+
+            if (best->isDoorOpen())
+                audioPlay("assets/sounds/door_open.wav");
+            else
+                audioPlay("assets/sounds/door_close.wav");
             return true;
         }
         return false;
