@@ -877,7 +877,17 @@ namespace Example
         model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
 
         if (useBodyShape) {
-            bodyShape.render(model, viewProj);
+            // 1. إنشاء مصفوفة جديدة للتعديل بناءً على مصفوفة السيارة الأصلية
+            glm::mat4 correctedModel = model;
+
+            // 2. سطر الرفع: (عدل الرقم 0.5f حتى تلمس العجلات المنصة تماماً)
+            correctedModel = glm::translate(correctedModel, glm::vec3(0.0f, 0.5f, 0.0f));
+
+
+            // 3. رسم الموديل بالمصفوفة "المصححة" فقط
+            bodyShape.render(correctedModel, viewProj);
+
+            // 4. إنهاء الدالة هنا كي لا يكمل ويرسم الأجزاء البرمجية القديمة
             return;
         }
 

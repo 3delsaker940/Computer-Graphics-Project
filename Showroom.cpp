@@ -376,9 +376,9 @@ namespace Example
         );
 
         Example::Car* modelCar = new Example::Car();
-        Example::loadModelToShape(modelCar->bodyShape, "assets/models/car1/Porsche.obj", { 1.0f, 1.0f, 1.0f });
+        Example::loadModelToShape(modelCar->bodyShape, "assets/models/Porsche.glb", { 1.0f, 1.0f, 1.0f });
         modelCar->useBodyShape = true;   // ← مهم
-        rooms[0]->addExistingCarToPodium(2, modelCar);  // ← المنصة 2
+        rooms[0]->addExistingCarToPodium(0, modelCar);  // ← المنصة 2
 
         std::cout << "✅ Cars added to showroom!" << std::endl;
         std::cout << "💡 Press E near a car to enter/exit" << std::endl;
