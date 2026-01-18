@@ -134,6 +134,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Car.cpp" />
     <ClCompile Include="dependencies\dependencies\glad\src\glad.c" />
+    <ClCompile Include="grass.cpp" />
     <ClCompile Include="Lighting.cpp" />
     <ClCompile Include="Room.cpp" />
     <ClCompile Include="Showroom.cpp" />
@@ -143,16 +144,20 @@
     <ClCompile Include="src\textured-shape.cpp" />
     <ClCompile Include="street.cpp" />
     <ClCompile Include="street.hpp" />
+    <ClCompile Include="tree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="Car.hpp" />
+    <ClInclude Include="grass.hpp" />
     <ClInclude Include="include\basic-shape.hpp" />
     <ClInclude Include="include\shader-utils.hpp" />
     <ClInclude Include="include\textured-shape.hpp" />
     <ClInclude Include="Lighting.hpp" />
     <ClInclude Include="Room.hpp" />
     <ClInclude Include="Showroom.hpp" />
+    <ClInclude Include="stb_image.hpp" />
+    <ClInclude Include="tree.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
