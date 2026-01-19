@@ -4,8 +4,5 @@
 namespace Example {
     class Street : public TexturedShape {
     public:
-        Street(); // Constructor
-        void setupStreet(); // ???? ?????? ??????
-        void draw(); // ???? ?????
-    };
+        Street();         void setupStreet();         void draw();     };
 }

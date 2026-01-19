@@ -7,9 +7,6 @@
 #include "shader-utils.hpp"
 #include "basic-shape.hpp"
 
-// ═══════════════════════════════════════════════════════════════════
-// ✅ شيدر جديد مع دعم الإضاءة
-// ═══════════════════════════════════════════════════════════════════
 
 static const char* BASIC_VERTEX_SHADER_SRC = R"(
 #version 330 core
@@ -27,12 +24,10 @@ uniform mat4 transform;
 
 void main()
 {
-    // حساب موقع الـ Fragment في العالم
-    vec4 worldPos = transform * vec4(aPos, 1.0);
+        vec4 worldPos = transform * vec4(aPos, 1.0);
     FragPos = vec3(worldPos);
     
-    // تحويل Normal (مهم للدوران)
-    mat3 normalMatrix = transpose(inverse(mat3(transform)));
+        mat3 normalMatrix = transpose(inverse(mat3(transform)));
     Normal = normalize(normalMatrix * aNormal);
     
     Color = aColor;
@@ -53,11 +48,9 @@ out vec4 FragColor;
 uniform float alpha;
 uniform vec3 viewPos;
 
-// الإضاءة المحيطة
 uniform vec3 ambientColor;
 uniform float ambientIntensity;
 
-// الإضاءة الاتجاهية
 struct DirLight {
     vec3 direction;
     vec3 color;
@@ -65,7 +58,6 @@ struct DirLight {
 };
 uniform DirLight dirLight;
 
-// المصابيح النقطية
 #define MAX_POINT_LIGHTS 16
 struct PointLight {
     vec3 position;
@@ -76,7 +68,6 @@ struct PointLight {
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 uniform int numPointLights;
 
-// المصابيح المركزة
 #define MAX_SPOT_LIGHTS 8
 struct SpotLight {
     vec3 position;
@@ -89,19 +80,14 @@ struct SpotLight {
 uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
 uniform int numSpotLights;
 
-// ═══════════════════════════════════════════════════════════
-// دوال حساب الإضاءة
-// ═══════════════════════════════════════════════════════════
 
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 {
     vec3 lightDir = normalize(-light.direction);
     
-    // Diffuse
-    float diff = max(dot(normal, lightDir), 0.0);
+        float diff = max(dot(normal, lightDir), 0.0);
     
-    // Specular
-    vec3 reflectDir = reflect(-lightDir, normal);
+        vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
     
     vec3 diffuse = light.color * diff * light.intensity;
@@ -114,15 +100,12 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
     vec3 lightDir = normalize(light.position - fragPos);
     
-    // المسافة والتخفيف
-    float distance = length(light.position - fragPos);
+        float distance = length(light.position - fragPos);
     float attenuation = 1.0 / (1.0 + (distance / light.radius) * (distance / light.radius));
     
-    // Diffuse
-    float diff = max(dot(normal, lightDir), 0.0);
+        float diff = max(dot(normal, lightDir), 0.0);
     
-    // Specular
-    vec3 reflectDir = reflect(-lightDir, normal);
+        vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
     
     vec3 diffuse = light.color * diff * light.intensity * attenuation;
@@ -135,23 +118,19 @@ vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
     vec3 lightDir = normalize(light.position - fragPos);
     
-    // زاوية الضوء
-    float theta = dot(lightDir, normalize(-light.direction));
+        float theta = dot(lightDir, normalize(-light.direction));
     float epsilon = light.cutOff - light.outerCutOff;
     float spotIntensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
     
     if (theta < light.outerCutOff)
         return vec3(0.0);
     
-    // المسافة
-    float distance = length(light.position - fragPos);
+        float distance = length(light.position - fragPos);
     float attenuation = 1.0 / (1.0 + 0.09 * distance + 0.032 * distance * distance);
     
-    // Diffuse
-    float diff = max(dot(normal, lightDir), 0.0);
+        float diff = max(dot(normal, lightDir), 0.0);
     
-    // Specular
-    vec3 reflectDir = reflect(-lightDir, normal);
+        vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
     
     vec3 diffuse = light.color * diff * light.intensity * attenuation * spotIntensity;
@@ -165,33 +144,24 @@ void main()
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
     
-    // ═══════════════════════════════════════════════════════════
-    // جمع الإضاءة من كل المصادر
-    // ═══════════════════════════════════════════════════════════
+                
+        vec3 ambient = ambientColor * ambientIntensity;
     
-    // 1. الإضاءة المحيطة
-    vec3 ambient = ambientColor * ambientIntensity;
+        vec3 result = calcDirLight(dirLight, norm, viewDir);
     
-    // 2. الإضاءة الاتجاهية
-    vec3 result = calcDirLight(dirLight, norm, viewDir);
-    
-    // 3. المصابيح النقطية
-    for (int i = 0; i < numPointLights && i < MAX_POINT_LIGHTS; i++)
+        for (int i = 0; i < numPointLights && i < MAX_POINT_LIGHTS; i++)
     {
         result += calcPointLight(pointLights[i], norm, FragPos, viewDir);
     }
     
-    // 4. المصابيح المركزة
-    for (int i = 0; i < numSpotLights && i < MAX_SPOT_LIGHTS; i++)
+        for (int i = 0; i < numSpotLights && i < MAX_SPOT_LIGHTS; i++)
     {
         result += calcSpotLight(spotLights[i], norm, FragPos, viewDir);
     }
     
-    // دمج النتيجة مع اللون
-    vec3 finalColor = (ambient + result) * Color;
+        vec3 finalColor = (ambient + result) * Color;
     
-    // تحديد السطوع الأقصى
-    finalColor = clamp(finalColor, 0.0, 1.5);
+        finalColor = clamp(finalColor, 0.0, 1.5);
     
     FragColor = vec4(finalColor, alpha);
 }
@@ -207,7 +177,7 @@ namespace Example
             return;
         shaderProgram = compileAndLinkShaderProgram(BASIC_VERTEX_SHADER_SRC, BASIC_FRAGMENT_SHADER_SRC, "lit-shader");
 
-        std::cout << "✅ Lighting shader compiled successfully!" << std::endl;
+        std::cout << " Lighting shader compiled successfully!" << std::endl;
     }
 
     BasicShape::BasicShape()
@@ -232,18 +202,15 @@ namespace Example
         glGenVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
 
-        // Position (location = 0)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BasicVertex),
+                glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BasicVertex),
             (void*)offsetof(BasicVertex, position));
         glEnableVertexAttribArray(0);
 
-        // Color (location = 1)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(BasicVertex),
+                glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(BasicVertex),
             (void*)offsetof(BasicVertex, color));
         glEnableVertexAttribArray(1);
 
-        // ✅ Normal (location = 2)
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(BasicVertex),
+                glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(BasicVertex),
             (void*)offsetof(BasicVertex, normal));
         glEnableVertexAttribArray(2);
 

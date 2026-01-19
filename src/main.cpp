@@ -16,7 +16,6 @@
 #include "../Showroom.hpp"
 #include "../Car.hpp"
 
-//دالة تحميل الصور
 GLuint loadTexture(const char* path)
 {
     int w, h, ch;
@@ -49,17 +48,14 @@ public:
     Example::Tree treeField;
 
 
-    // ✅ حالة الجلوس في السيارة
     bool isInCar = false;
     Example::Car* currentCar = nullptr;
     glm::vec3 savedPosition;
     float savedYaw, savedPitch;
 
-    // ✅ للتحكم بالضغط على E
-    bool eKeyWasPressed = false;
+        bool eKeyWasPressed = false;
 
-    // ✅ لعرض رسالة التفاعل
-    bool nearCar = false;
+        bool nearCar = false;
 
     Application() : appCamera(glm::vec3(0.0f, 2.5f, 75.0f)), window(nullptr) {}
 
@@ -91,25 +87,17 @@ public:
         float dt = t - lastFrameTime;
         lastFrameTime = t;
 
-        // ═══════════════════════════════════════════════════════════
-        // معالجة المدخلات
-        // ═══════════════════════════════════════════════════════════
-
+                        
         if (!isInCar)
         {
-            // ─────────────────────────────────────────
-            // وضع المشي العادي
-            // ─────────────────────────────────────────
             glm::vec3 oldPos = appCamera.Position;
             handleMovement(dt);
             appCamera.Position = showroom.checkCollision(oldPos, appCamera.Position);
             appCamera.Position.y = 2.5f;
 
-            // فحص إذا كان قريب من سيارة
             Example::Car* nearbyCar = showroom.findNearestCar(appCamera.Position);
             nearCar = (nearbyCar != nullptr);
 
-            // فحص الضغط على E للدخول
             bool ePressed = glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS;
             if (ePressed && !eKeyWasPressed && nearbyCar != nullptr)
             {
@@ -117,7 +105,6 @@ public:
             }
             eKeyWasPressed = ePressed;
 
-            // زر F لفتح/إغلاق باب الغرفة
             static bool fKeyWasPressed = false;
             bool fPressed = glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS;
             if (fPressed && !fKeyWasPressed)
@@ -128,48 +115,43 @@ public:
         }
         else
         {
-            // ─────────────────────────────────────────
-            // وضع قيادة السيارة
-            // ─────────────────────────────────────────
+
             if (!currentCar)
             {
                 isInCar = false;
                 return;
             }
 
-            // E للخروج من السيارة
+                        
             bool ePressed = glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS;
             if (ePressed && !eKeyWasPressed)
             {
                 exitCar();
                 eKeyWasPressed = ePressed;
-                return; // مهم حتى لا نكمل باستخدام currentCar بعد ما تصير nullptr
+                return;           
             }
             eKeyWasPressed = ePressed;
 
-            // W/S للقيادة
+                       
             float tInput = 0.0f;
             if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) tInput += 1.0f;
             if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) tInput -= 1.0f;
             currentCar->setThrottle(tInput);
 
-            // A/D للتوجيه
+                        
             float sInput = 0.0f;
             if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) sInput -= 1.0f;
             if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) sInput += 1.0f;
             currentCar->setSteer(sInput);
         }
 
-        // تحديث الأبواب + السيارات
+               
         showroom.update(dt);
 
-        // ═══════════════════════════════════════════════════════════
-        // الأصوات العالمية:
-        // خارج المعرض = ريح ، داخل المعرض = موسيقى
-        // ═══════════════════════════════════════════════════════════
-        {
-            const float buildingHalfSize = 70.0f; // نفس showroomSize في Showroom::init
+                                        {
+          
 
+            const float buildingHalfSize = 70.0f; 
             bool isOutside =
                 (appCamera.Position.x < -buildingHalfSize) ||
                 (appCamera.Position.x > buildingHalfSize) ||
@@ -180,13 +162,13 @@ public:
 
             if (isOutside && !wasOutside)
             {
-                // انتقلت من داخل -> خارج
+                              
                 audioOutdoorStart();
                 audioIndoorStop();
             }
             else if (!isOutside && wasOutside)
             {
-                // انتقلت من خارج -> داخل
+                               
                 audioOutdoorStop();
                 audioIndoorStart();
             }
@@ -194,21 +176,20 @@ public:
             wasOutside = isOutside;
         }
 
-        // تثبيت الكاميرا في مقعد السائق إذا كنا داخل السيارة
-        if (isInCar && currentCar)
+                if (isInCar && currentCar)
         {
             appCamera.Position = currentCar->getDriverSeatPosition();
         }
 
-        // ESC للخروج من البرنامج
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+               
+
+                if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
 
-        // تحديث موقع الكاميرا للإضاءة
-        showroom.lighting.setViewPosition(appCamera.Position);
+               
+                showroom.lighting.setViewPosition(appCamera.Position);
 
-        // زر L لتبديل الإضاءة
-        static bool lKeyWasPressed = false;
+                static bool lKeyWasPressed = false;
         bool lPressed = glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS;
         if (lPressed && !lKeyWasPressed)
         {
@@ -216,10 +197,7 @@ public:
         }
         lKeyWasPressed = lPressed;
 
-        // ═══════════════════════════════════════════════════════════
-        // الرسم
-        // ═══════════════════════════════════════════════════════════
-
+                        
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
         glViewport(0, 0, width, height);
@@ -228,18 +206,16 @@ public:
         glm::mat4 projection = glm::perspective(glm::radians(60.0f), aspectRatio, 0.1f, 300.0f);
         glm::mat4 viewProj = projection * appCamera.GetViewMatrix();
 
-        // لون الخلفية
-        if (isInCar)
-            glClearColor(0.02f, 0.02f, 0.03f, 1.0f);  // أغمق داخل السيارة
-        else
+                if (isInCar)
+            glClearColor(0.02f, 0.02f, 0.03f, 1.0f);   
+                else
             glClearColor(0.05f, 0.05f, 0.1f, 1.0f);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         showroom.renderAll(viewProj);
 
-        // تفعيل الشفافية لرسم العشب والشجر
-        glEnable(GL_BLEND);
+                glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthMask(GL_FALSE);
 
@@ -248,8 +224,7 @@ public:
 
         glDepthMask(GL_TRUE);
 
-        // تحديث عنوان النافذة
-        updateWindowTitle();
+                updateWindowTitle();
     }
 
 private:
@@ -271,27 +246,23 @@ private:
 
         if (!car) return;
 
-        std::cout << "🚗 Entering car..." << std::endl;
+        std::cout << " Entering car..." << std::endl;
 
         audioPlay("assets/sounds/engine_start.flac");
         currentCar = car;
         isInCar = true;
         currentCar->setDriverDoorOpen(true);
 
-        // حفظ الموقع الحالي للعودة إليه لاحقاً
-        savedPosition = appCamera.Position;
+                savedPosition = appCamera.Position;
         savedYaw = appCamera.Yaw;
         savedPitch = appCamera.Pitch;
 
-        // الانتقال لمقعد السائق
-        appCamera.Position = car->getDriverSeatPosition();
+                appCamera.Position = car->getDriverSeatPosition();
 
-        // توجيه الكاميرا للأمام (اتجاه السيارة)
-        glm::vec3 viewDir = car->getDriverViewDirection();
+                glm::vec3 viewDir = car->getDriverViewDirection();
         appCamera.Yaw = glm::degrees(atan2(viewDir.z, viewDir.x));
-        appCamera.Pitch = -5.0f;  // النظر للأمام قليلاً للأسفل
-
-        std::cout << "✅ Now sitting in driver seat!" << std::endl;
+        appCamera.Pitch = -5.0f;  
+        std::cout << " Now sitting in driver seat!" << std::endl;
         std::cout << "   Press E to exit the car" << std::endl;
     }
 
@@ -299,12 +270,11 @@ private:
     {
         if (!isInCar || !currentCar) return;
 
-        std::cout << "🚶 Exiting car..." << std::endl;
+        std::cout << " Exiting car..." << std::endl;
 
 
 
-        // العودة للموقع المحفوظ
-        appCamera.Position = savedPosition;
+                appCamera.Position = savedPosition;
         appCamera.Yaw = savedYaw;
         appCamera.Pitch = savedPitch;
 
@@ -317,7 +287,7 @@ private:
         isInCar = false;
         currentCar = nullptr;
 
-        std::cout << "✅ Exited car!" << std::endl;
+        std::cout << " Exited car!" << std::endl;
     }
 
     void updateWindowTitle()
@@ -326,11 +296,11 @@ private:
 
         if (isInCar)
         {
-            title += " | 🚗 Inside Car - Press E to Exit";
+            title += " |  Inside Car - Press E to Exit";
         }
         else if (nearCar)
         {
-            title += " | 💡 Press E to Enter Car";
+            title += " |  Press E to Enter Car";
         }
         else
         {
@@ -341,7 +311,6 @@ private:
     }
 };
 
-// مؤشر عالمي للوصول إلى التطبيق
 Application* g_AppInstance = nullptr;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -364,12 +333,9 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
     if (g_AppInstance)
     {
-        // ✅ تقييد الحركة داخل السيارة
-        if (g_AppInstance->isInCar)
+                if (g_AppInstance->isInCar)
         {
-            // السماح بنظرة محدودة داخل السيارة
-            xoffset *= 0.5f;  // تقليل حساسية الدوران
-            yoffset *= 0.5f;
+                        xoffset *= 0.5f;              yoffset *= 0.5f;
         }
 
         g_AppInstance->appCamera.ProcessMouseMovement(xoffset, yoffset);
@@ -384,8 +350,7 @@ int main()
         return -1;
     }
 
-    // إعدادات OpenGL
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 

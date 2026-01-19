@@ -13,8 +13,7 @@ namespace Example {
         this->textureID2 = texHuge;
         if (!shaderReady) { compileShader(); }
 
-        //شكل الشجرة
-        float h = 3.0f; float w = 1.5f;
+                float h = 3.0f; float w = 1.5f;
         std::vector<TexturedVertex> v;
         for (int i = 0; i < 3; i++) {
             float angle = glm::radians(i * 60.0f);
@@ -37,14 +36,12 @@ namespace Example {
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)offsetof(TexturedVertex, uv));
         glEnableVertexAttribArray(2);
 
-        // توزيع الشجر الصغير
-        this->instancePositions.clear();
+                this->instancePositions.clear();
         for (float z = 80.0f; z <= 150.0f; z += 20.0f) {
             this->instancePositions.push_back(glm::vec3(12.0f, 0.0f, z));
             this->instancePositions.push_back(glm::vec3(-12.0f, 0.0f, z));
         }
-        // توزيع الشجر الكبير 
-        this->hugeTreePositions.clear();
+                this->hugeTreePositions.clear();
       
         for (float z = 80.0f; z <= 140.0f; z += 20.0f) {
             this->hugeTreePositions.push_back(glm::vec3(45.0f, 0.0f, z));
@@ -61,16 +58,14 @@ namespace Example {
 
         glBindVertexArray(this->VAO);
 
-        // رسم الشجر الصغير
-        glBindTexture(GL_TEXTURE_2D, this->textureID);
+                glBindTexture(GL_TEXTURE_2D, this->textureID);
         for (const auto& pos : instancePositions) {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
             glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
             glDrawArrays(GL_TRIANGLES, 0, vertexCount);
         }
 
-        // رسم الشجر الكبير
-        glBindTexture(GL_TEXTURE_2D, this->textureID2);
+                glBindTexture(GL_TEXTURE_2D, this->textureID2);
         for (size_t i = 0; i < hugeTreePositions.size(); i++) {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), hugeTreePositions[i]);
             model = glm::rotate(model, (float)i * 0.5f, glm::vec3(0, 1, 0));

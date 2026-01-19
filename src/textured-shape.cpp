@@ -11,8 +11,7 @@ namespace Example {
     GLuint TexturedShape::cameraLoc = 0, TexturedShape::transformLoc = 0, TexturedShape::timeLoc = 0;
     bool TexturedShape::shaderReady = false;
 
-    // 1. الشيدر يدعم الشفافية وحركة الرياحnew
-    static const char* vertexSrc = R"(#version 330 core
+        static const char* vertexSrc = R"(#version 330 core
 layout (location = 0) in vec3 aPos;
 layout (location = 2) in vec2 aUV;
 uniform mat4 transform;
@@ -22,8 +21,7 @@ out vec2 vUV;
 void main() {
     vUV = aUV;
     vec3 pos = aPos;
-    // تحريك الرأس العلوي فقط (Wind Effect)
-    if(pos.y > 0.1) { 
+        if(pos.y > 0.1) { 
        pos.x += sin(time * 3.0 + abs(transform[3][0]) + transform[3][2]) * 0.25;
     }
     gl_Position = camera * transform * vec4(pos, 1.0);
@@ -35,8 +33,7 @@ out vec4 FragColor;
 uniform sampler2D ourTexture;
 void main() {
     vec4 texColor = texture(ourTexture, vUV);
-    // إلغاء رسم البكسلات الشفافة جداً أو القريبة من السواد التام
-    if(texColor.a < 0.2) discard; 
+        if(texColor.a < 0.2) discard; 
     FragColor = texColor;
 })";
 
@@ -67,20 +64,16 @@ void main() {
 
         glUseProgram(shaderProgram);
 
-        // إرسال الوقت لتحريك العشب
-        glUniform1f(timeLoc, (float)glfwGetTime());
+                glUniform1f(timeLoc, (float)glfwGetTime());
 
-        // تفعيل التكتشر
-        glActiveTexture(GL_TEXTURE0);
+                glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureID);
 
-        // إرسال مصفوفة الكاميرا (ViewProjection)
-        glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera));
+                glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera));
 
         glBindVertexArray(VAO);
 
-        // رسم كل نسخة من العشب في موقعها
-        for (const auto& pos : instancePositions) {
+                for (const auto& pos : instancePositions) {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
             glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
             glDrawArrays(GL_TRIANGLES, 0, vertexCount);

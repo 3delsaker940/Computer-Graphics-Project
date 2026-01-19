@@ -9,45 +9,31 @@ namespace Example
     class SportsCar
     {
     private:
-        // الهيكل الخارجي
-        BasicShape body;
+                BasicShape body;
         BasicShape hood;
         BasicShape roof;
         BasicShape rear;
-        BasicShape doors;          // ✅ الأبواب
-
-        // العجلات
-        BasicShape wheels;
+        BasicShape doors;          
+                BasicShape wheels;
         BasicShape wheelRims;
 
-        // المصابيح
-        BasicShape headlights;
+                BasicShape headlights;
         BasicShape taillights;
 
-        // النوافذ
-        BasicShape windowFront;
+                BasicShape windowFront;
         BasicShape windowRear;
-        BasicShape windowsSide;    // نوافذ الأبواب
-
-        // التفاصيل
-        BasicShape grille;
+        BasicShape windowsSide;    
+                BasicShape grille;
         BasicShape mirrors;
         BasicShape spoiler;
-        BasicShape doorHandles;    // ✅ مقابض الأبواب
-
+        BasicShape doorHandles;    
         glm::vec3 position;
         float rotation;
         glm::vec3 bodyColor;
 
-        // ✅ أبعاد أكبر
-        float length = 4.6f;       // كان 4.2
-        float width = 2.1f;        // كان 1.95
-        float height = 1.25f;      // كان 1.15
-        float groundClearance = 0.15f;  // كان 0.12
-
+                float length = 4.6f;               float width = 2.1f;                float height = 1.25f;              float groundClearance = 0.15f;  
         void buildBody();
-        void buildDoors();         // ✅ جديد
-        void buildWheels();
+        void buildDoors();                 void buildWheels();
         void buildLights();
         void buildWindows();
         void buildDetails();

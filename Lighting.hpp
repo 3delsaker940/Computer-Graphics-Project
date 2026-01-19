@@ -6,10 +6,7 @@
 
 namespace Example
 {
-    // ═══════════════════════════════════════════════════════════
-    // أنواع الإضاءة
-    // ═══════════════════════════════════════════════════════════
-
+            
     struct DirectionalLight
     {
         glm::vec3 direction;
@@ -28,8 +25,7 @@ namespace Example
         glm::vec3 position;
         glm::vec3 color;
         float intensity;
-        float radius;       // المدى
-        bool enabled;
+        float radius;               bool enabled;
 
         PointLight(glm::vec3 pos = { 0, 0, 0 },
             glm::vec3 col = { 1.0f, 1.0f, 1.0f },
@@ -45,9 +41,7 @@ namespace Example
         glm::vec3 direction;
         glm::vec3 color;
         float intensity;
-        float cutoffAngle;      // زاوية القطع الداخلية (بالدرجات)
-        float outerCutoffAngle; // زاوية القطع الخارجية
-        bool enabled;
+        float cutoffAngle;              float outerCutoffAngle;         bool enabled;
 
         SpotLight(glm::vec3 pos = { 0, 5, 0 },
             glm::vec3 dir = { 0, -1, 0 },
@@ -60,48 +54,35 @@ namespace Example
         }
     };
 
-    // ═══════════════════════════════════════════════════════════
-    // مدير الإضاءة
-    // ═══════════════════════════════════════════════════════════
-
+            
     class LightingManager
     {
     public:
-        // الإضاءة المحيطة
-        glm::vec3 ambientColor = { 0.15f, 0.15f, 0.2f };
+                glm::vec3 ambientColor = { 0.15f, 0.15f, 0.2f };
         float ambientIntensity = 0.3f;
 
-        // الإضاءة الاتجاهية (الشمس/القمر)
-        DirectionalLight directionalLight;
+                DirectionalLight directionalLight;
 
-        // المصابيح النقطية (حتى 16 مصباح)
-        std::vector<PointLight> pointLights;
+                std::vector<PointLight> pointLights;
 
-        // المصابيح المركزة (حتى 8 مصابيح)
-        std::vector<SpotLight> spotLights;
+                std::vector<SpotLight> spotLights;
 
-        // موقع الكاميرا (للانعكاس)
-        glm::vec3 viewPosition;
+                glm::vec3 viewPosition;
 
     public:
         LightingManager();
 
-        bool lightsOn = true;  // ✅ أضف هذا السطر
+        bool lightsOn = true;  
 
-
-        // إضافة مصابيح
-        void addPointLight(const PointLight& light);
+                void addPointLight(const PointLight& light);
         void addSpotLight(const SpotLight& light);
 
-        // تبديل حالة المصابيح
-        void togglePointLight(int index);
+                void togglePointLight(int index);
         void toggleSpotLight(int index);
         void toggleAllLights();
 
-        // إرسال بيانات الإضاءة للشيدر
-        void applyToShader(GLuint shaderProgram) const;
+                void applyToShader(GLuint shaderProgram) const;
 
-        // تحديث موقع الكاميرا
-        void setViewPosition(glm::vec3 pos) { viewPosition = pos; }
+                void setViewPosition(glm::vec3 pos) { viewPosition = pos; }
     };
 }

@@ -69,31 +69,22 @@ namespace Example
         float cabinStart = L * 0.05f;
         float cabinEnd = -L * 0.55f;
 
-        // ═══════════════════════════════════════════════════════════
-        // الجسم السفلي
-        // ═══════════════════════════════════════════════════════════
-
-        // الجانب الأيمن السفلي
-        addQuad(bodyVerts,
+                        
+                addQuad(bodyVerts,
             { L, G, W }, { -L, G, W }, { -L, cabinBottom, W }, { L, cabinBottom, W },
             mainColor, nRight);
 
-        // الجانب الأيسر السفلي
-        addQuad(bodyVerts,
+                addQuad(bodyVerts,
             { -L, G, -W }, { L, G, -W }, { L, cabinBottom, -W }, { -L, cabinBottom, -W },
             mainColor, nLeft);
 
-        // الأسفل
-        addQuad(bodyVerts,
+                addQuad(bodyVerts,
             { L, G, -W }, { -L, G, -W }, { -L, G, W }, { L, G, W },
             black, nDown);
 
         body = BasicShape(bodyVerts);
 
-        // ═══════════════════════════════════════════════════════════
-        // غطاء المحرك
-        // ═══════════════════════════════════════════════════════════
-
+                        
         glm::vec3 hoodNormal = glm::normalize(glm::vec3(0.3f, 1.0f, 0.0f));
 
         addQuad(hoodVerts,
@@ -103,13 +94,11 @@ namespace Example
             { hoodEnd, hoodHeight, -W + 0.1f },
             mainColor, hoodNormal);
 
-        // المقدمة
-        addQuad(hoodVerts,
+                addQuad(hoodVerts,
             { L, G, -W }, { L, G, W }, { L, noseHeight, W }, { L, noseHeight, -W },
             darkColor, nFront);
 
-        // جانب الغطاء
-        addQuad(hoodVerts,
+                addQuad(hoodVerts,
             { noseEnd, noseHeight, W }, { hoodEnd, hoodHeight, W },
             { hoodEnd, cabinBottom, W }, { noseEnd, G + 0.2f, W },
             mainColor, nRight);
@@ -121,10 +110,7 @@ namespace Example
 
         hood = BasicShape(hoodVerts);
 
-        // ═══════════════════════════════════════════════════════════
-        // السقف
-        // ═══════════════════════════════════════════════════════════
-
+                        
         float roofW = W * 0.82f;
 
         addQuad(roofVerts,
@@ -136,10 +122,7 @@ namespace Example
 
         roof = BasicShape(roofVerts);
 
-        // ═══════════════════════════════════════════════════════════
-        // المؤخرة
-        // ═══════════════════════════════════════════════════════════
-
+                        
         float tailHeight = G + 0.75f;
 
         addQuad(rearVerts,
@@ -175,56 +158,44 @@ namespace Example
         float doorTop = G + 0.95f;
         float windowBottom = G + 0.65f;
 
-        // ═══════════════════════════════════════════════════════════
-        // الباب الأيمن (مع فتحة للنافذة)
-        // ═══════════════════════════════════════════════════════════
-
-        // الجزء السفلي من الباب (تحت النافذة)
-        addQuad(doorVerts,
+                        
+                addQuad(doorVerts,
             { doorFront, doorBottom, W + 0.01f },
             { doorBack, doorBottom, W + 0.01f },
             { doorBack, windowBottom, W + 0.01f },
             { doorFront, windowBottom, W + 0.01f },
             doorColor, nRight);
 
-        // الإطار الأمامي للنافذة
-        addQuad(doorVerts,
+                addQuad(doorVerts,
             { doorFront, windowBottom, W + 0.01f },
             { doorFront - 0.08f, windowBottom, W + 0.01f },
             { doorFront - 0.1f, doorTop, W + 0.01f },
             { doorFront, doorTop, W + 0.01f },
             doorDark, nRight);
 
-        // الإطار الخلفي للنافذة
-        addQuad(doorVerts,
+                addQuad(doorVerts,
             { doorBack + 0.08f, windowBottom, W + 0.01f },
             { doorBack, windowBottom, W + 0.01f },
             { doorBack, doorTop, W + 0.01f },
             { doorBack + 0.1f, doorTop, W + 0.01f },
             doorDark, nRight);
 
-        // ═══════════════════════════════════════════════════════════
-        // الباب الأيسر (مع فتحة للنافذة)
-        // ═══════════════════════════════════════════════════════════
-
-        // الجزء السفلي
-        addQuad(doorVerts,
+                        
+                addQuad(doorVerts,
             { doorBack, doorBottom, -W - 0.01f },
             { doorFront, doorBottom, -W - 0.01f },
             { doorFront, windowBottom, -W - 0.01f },
             { doorBack, windowBottom, -W - 0.01f },
             doorColor, nLeft);
 
-        // الإطار الأمامي
-        addQuad(doorVerts,
+                addQuad(doorVerts,
             { doorFront - 0.08f, windowBottom, -W - 0.01f },
             { doorFront, windowBottom, -W - 0.01f },
             { doorFront, doorTop, -W - 0.01f },
             { doorFront - 0.1f, doorTop, -W - 0.01f },
             doorDark, nLeft);
 
-        // الإطار الخلفي
-        addQuad(doorVerts,
+                addQuad(doorVerts,
             { doorBack, windowBottom, -W - 0.01f },
             { doorBack + 0.08f, windowBottom, -W - 0.01f },
             { doorBack + 0.1f, doorTop, -W - 0.01f },
@@ -246,8 +217,7 @@ namespace Example
         float L = length / 2.0f;
         float W = width / 2.0f;
 
-        // ✅ عجلات أكبر
-        float wheelRadius = 0.42f;
+                float wheelRadius = 0.42f;
         float wheelWidth = 0.28f;
         float rimRadius = 0.32f;
 
@@ -309,8 +279,7 @@ namespace Example
                 rimVerts.push_back({ {x2, y2, rimZ}, rimDark, rimNormal });
             }
 
-            // 5 spokes
-            for (int spoke = 0; spoke < 5; spoke++)
+                        for (int spoke = 0; spoke < 5; spoke++)
             {
                 float spokeAngle = spoke * 2.0f * 3.14159f / 5.0f;
                 float spokeWidth = 0.045f;
@@ -347,8 +316,7 @@ namespace Example
         float headH = 0.1f;
         float headW = 0.45f;
 
-        // مصابيح أمامية LED رفيعة
-        addQuad(headVerts,
+                addQuad(headVerts,
             { L + 0.02f, headY, -W + 0.1f }, { L + 0.02f, headY, -W + 0.1f + headW },
             { L + 0.02f, headY + headH, -W + 0.1f + headW }, { L + 0.02f, headY + headH, -W + 0.1f },
             headlightColor, nFront);
@@ -360,8 +328,7 @@ namespace Example
 
         headlights = BasicShape(headVerts);
 
-        // مصابيح خلفية عريضة متصلة
-        float tailY = G + 0.55f;
+                float tailY = G + 0.55f;
         float tailH = 0.08f;
 
         addQuad(tailVerts,
@@ -391,8 +358,7 @@ namespace Example
         float cabinEnd = -L * 0.55f;
         float roofW = W * 0.82f;
 
-        // الزجاج الأمامي
-        glm::vec3 windshieldNormal = glm::normalize(glm::vec3(0.7f, 0.7f, 0.0f));
+                glm::vec3 windshieldNormal = glm::normalize(glm::vec3(0.7f, 0.7f, 0.0f));
 
         addQuad(frontVerts,
             { L * 0.32f, cabinBottom + 0.08f, -roofW + 0.05f },
@@ -403,8 +369,7 @@ namespace Example
 
         windowFront = BasicShape(frontVerts);
 
-        // الزجاج الخلفي
-        glm::vec3 rearWindowNormal = glm::normalize(glm::vec3(-0.7f, 0.7f, 0.0f));
+                glm::vec3 rearWindowNormal = glm::normalize(glm::vec3(-0.7f, 0.7f, 0.0f));
 
         addQuad(rearVerts,
             { cabinEnd + 0.05f, roofHeight - 0.12f, -roofW * 0.88f },
@@ -415,10 +380,7 @@ namespace Example
 
         windowRear = BasicShape(rearVerts);
 
-        // ═══════════════════════════════════════════════════════════
-        // ✅ نوافذ الأبواب الجانبية
-        // ═══════════════════════════════════════════════════════════
-
+                        
         float doorFront = L * 0.3f;
         float doorBack = -L * 0.35f;
         float windowBottom = G + 0.68f;
@@ -427,16 +389,14 @@ namespace Example
         glm::vec3 nLeft = { 0, 0, -1 };
         glm::vec3 nRight = { 0, 0, 1 };
 
-        // نافذة يمين
-        addQuad(sideVerts,
+                addQuad(sideVerts,
             { doorFront - 0.1f, windowBottom + 0.02f, W + 0.02f },
             { doorBack + 0.12f, windowBottom + 0.02f, W + 0.02f },
             { doorBack + 0.12f, doorTop - 0.05f, W + 0.02f },
             { doorFront - 0.12f, doorTop - 0.05f, W + 0.02f },
             glassColor, nRight);
 
-        // نافذة يسار
-        addQuad(sideVerts,
+                addQuad(sideVerts,
             { doorBack + 0.12f, windowBottom + 0.02f, -W - 0.02f },
             { doorFront - 0.1f, windowBottom + 0.02f, -W - 0.02f },
             { doorFront - 0.12f, doorTop - 0.05f, -W - 0.02f },
@@ -465,16 +425,14 @@ namespace Example
         glm::vec3 nLeft = { 0, 0, -1 };
         glm::vec3 nRight = { 0, 0, 1 };
 
-        // فتحة هواء
-        addQuad(grilleVerts,
+                addQuad(grilleVerts,
             { L + 0.03f, G + 0.08f, -0.55f }, { L + 0.03f, G + 0.08f, 0.55f },
             { L + 0.03f, G + 0.22f, 0.5f }, { L + 0.03f, G + 0.22f, -0.5f },
             black, nFront);
 
         grille = BasicShape(grilleVerts);
 
-        // مرايا
-        float mirrorY = G + 0.95f;
+                float mirrorY = G + 0.95f;
         float mirrorX = L * 0.12f;
 
         addQuad(mirrorVerts,
@@ -489,8 +447,7 @@ namespace Example
 
         mirrors = BasicShape(mirrorVerts);
 
-        // جناح خلفي
-        float spoilerY = G + 0.8f;
+                float spoilerY = G + 0.8f;
         float spoilerX = -L + 0.22f;
 
         addQuad(spoilerVerts,
@@ -512,8 +469,7 @@ namespace Example
 
         spoiler = BasicShape(spoilerVerts);
 
-        // ✅ مقابض الأبواب
-        float handleY = G + 0.72f;
+                float handleY = G + 0.72f;
         float handleX = -0.05f;
         float handleLen = 0.12f;
 
@@ -553,8 +509,7 @@ namespace Example
         spoiler.render(model, viewProj);
         doorHandles.render(model, viewProj);
 
-        // النوافذ مع شفافية
-        windowFront.render(model, viewProj, 0.45f);
+                windowFront.render(model, viewProj, 0.45f);
         windowRear.render(model, viewProj, 0.45f);
         windowsSide.render(model, viewProj, 0.45f);
     }

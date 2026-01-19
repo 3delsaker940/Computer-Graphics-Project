@@ -60,8 +60,7 @@ namespace Example
         glm::vec3 nFront = { 1, 0, 0 };
         glm::vec3 nBack = { -1, 0, 0 };
 
-        // ????? ??????? ???????
-        float noseHeight = G + 0.45f;
+                float noseHeight = G + 0.45f;
         float hoodHeight = G + 0.65f;
         float cabinBottom = G + 0.7f;
         float roofHeight = G + H;
@@ -71,8 +70,7 @@ namespace Example
         float cabinStart = L * 0.0f;
         float cabinEnd = -L * 0.6f;
 
-        // ????? ?????? - ???? ????????
-        addQuad(bodyVerts,
+                addQuad(bodyVerts,
             { L, G, W }, { -L, G, W }, { -L, cabinBottom, W }, { L, cabinBottom, W },
             mainColor, nRight);
 
@@ -86,8 +84,7 @@ namespace Example
 
         body = BasicShape(bodyVerts);
 
-        // ???? ????? ??????? (???? ??? ??????)
-        glm::vec3 hoodNormal = glm::normalize(glm::vec3(0.25f, 1.0f, 0.0f));
+                glm::vec3 hoodNormal = glm::normalize(glm::vec3(0.25f, 1.0f, 0.0f));
 
         addQuad(hoodVerts,
             { noseEnd - 0.08f, noseHeight, -W + 0.12f },
@@ -96,13 +93,11 @@ namespace Example
             { hoodEnd, hoodHeight, -W + 0.12f },
             accentColor, hoodNormal);
 
-        // ??????? ??????? (????????)
-        addQuad(hoodVerts,
+                addQuad(hoodVerts,
             { L, G, -W }, { L, G, W }, { L, noseHeight, W }, { L, noseHeight, -W },
             darkColor, nFront);
 
-        // ????? ??????
-        addQuad(hoodVerts,
+                addQuad(hoodVerts,
             { noseEnd, noseHeight, W }, { hoodEnd, hoodHeight, W },
             { hoodEnd, cabinBottom, W }, { noseEnd, G + 0.25f, W },
             mainColor, nRight);
@@ -114,8 +109,7 @@ namespace Example
 
         hood = BasicShape(hoodVerts);
 
-        // ??? ????? ???????
-        float roofW = W * 0.85f;
+                float roofW = W * 0.85f;
 
         addQuad(roofVerts,
             { cabinStart, roofHeight, -roofW },
@@ -124,8 +118,7 @@ namespace Example
             { cabinEnd, roofHeight - 0.08f, -roofW },
             mainColor * 0.92f, nUp);
 
-        // ??????? ???????
-        addQuad(roofVerts,
+                addQuad(roofVerts,
             { cabinStart, cabinBottom, W }, { cabinEnd, cabinBottom, W },
             { cabinEnd, roofHeight - 0.08f, W * 0.88f }, { cabinStart, roofHeight, W * 0.88f },
             mainColor, nRight);
@@ -137,8 +130,7 @@ namespace Example
 
         roof = BasicShape(roofVerts);
 
-        // ??????? ??????????
-        float tailHeight = G + 0.85f;
+                float tailHeight = G + 0.85f;
 
         addQuad(rearVerts,
             { cabinEnd, roofHeight - 0.08f, -roofW },
@@ -173,16 +165,14 @@ namespace Example
         float doorTop = G + 1.15f;
         float windowBottom = G + 0.75f;
 
-        // ????? ??????
-        addQuad(doorVerts,
+                addQuad(doorVerts,
             { doorFront, doorBottom, W + 0.01f },
             { doorBack, doorBottom, W + 0.01f },
             { doorBack, windowBottom, W + 0.01f },
             { doorFront, windowBottom, W + 0.01f },
             doorColor, nRight);
 
-        // ?????? ????? (????? ???????)
-        addQuad(doorVerts,
+                addQuad(doorVerts,
             { doorFront, windowBottom, W + 0.01f },
             { doorFront - 0.06f, windowBottom, W + 0.01f },
             { doorFront - 0.08f, doorTop, W + 0.01f },
@@ -196,8 +186,7 @@ namespace Example
             { doorBack + 0.08f, doorTop, W + 0.01f },
             doorDark, nRight);
 
-        // ????? ??????
-        addQuad(doorVerts,
+                addQuad(doorVerts,
             { doorBack, doorBottom, -W - 0.01f },
             { doorFront, doorBottom, -W - 0.01f },
             { doorFront, windowBottom, -W - 0.01f },
@@ -229,8 +218,7 @@ namespace Example
         glm::vec3 tireColor = { 0.08f, 0.08f, 0.08f };
         glm::vec3 rimColor = { 0.85f, 0.85f, 0.9f };
         glm::vec3 rimDark = { 0.15f, 0.15f, 0.2f };
-        glm::vec3 rimAccent = { 0.3f, 0.5f, 0.8f };  // ???? ?????
-
+        glm::vec3 rimAccent = { 0.3f, 0.5f, 0.8f };  
         float L = length / 2.0f;
         float W = width / 2.0f;
 
@@ -278,12 +266,10 @@ namespace Example
                 wheelVerts.push_back({ {x1, y1, zOuter}, tireColor, n1 });
             }
 
-            // ???? ???????? (Aero wheels)
-            float rimZ = (wz > 0) ? zOuter + 0.01f : zInner - 0.01f;
+                        float rimZ = (wz > 0) ? zOuter + 0.01f : zInner - 0.01f;
             glm::vec3 rimNormal = (wz > 0) ? glm::vec3(0, 0, 1) : glm::vec3(0, 0, -1);
 
-            // ????? ???????
-            for (int i = 0; i < segments; i++)
+                        for (int i = 0; i < segments; i++)
             {
                 float angle1 = (float)i / segments * 2.0f * 3.14159f;
                 float angle2 = (float)(i + 1) / segments * 2.0f * 3.14159f;
@@ -322,8 +308,7 @@ namespace Example
         glm::vec3 nFront = { 1, 0, 0 };
         glm::vec3 nBack = { -1, 0, 0 };
 
-        // ?????? ?????? ????? LED
-        float headY = G + 0.35f;
+                float headY = G + 0.35f;
         float headH = 0.06f;
         float headW = 0.5f;
 
@@ -339,8 +324,7 @@ namespace Example
 
         headlights = BasicShape(headVerts);
 
-        // ???? LED ????? ???? (????? Tesla)
-        addQuad(ledVerts,
+                addQuad(ledVerts,
             { L + 0.03f, headY + headH + 0.02f, -W + 0.1f },
             { L + 0.03f, headY + headH + 0.02f, W - 0.1f },
             { L + 0.03f, headY + headH + 0.05f, W - 0.1f },
@@ -349,8 +333,7 @@ namespace Example
 
         ledStrip = BasicShape(ledVerts);
 
-        // ?????? ????? LED ?????
-        float tailY = G + 0.65f;
+                float tailY = G + 0.65f;
         float tailH = 0.05f;
 
         addQuad(tailVerts,
@@ -372,16 +355,14 @@ namespace Example
         float G = groundClearance;
         float H = height;
 
-        glm::vec3 glassColor = { 0.12f, 0.18f, 0.25f };  // ???? ????
-
+        glm::vec3 glassColor = { 0.12f, 0.18f, 0.25f };  
         float cabinBottom = G + 0.7f;
         float roofHeight = G + H;
         float cabinStart = L * 0.0f;
         float cabinEnd = -L * 0.6f;
         float roofW = W * 0.85f;
 
-        // ???? ????? ???? (???? ????)
-        glm::vec3 windshieldNormal = glm::normalize(glm::vec3(0.65f, 0.75f, 0.0f));
+                glm::vec3 windshieldNormal = glm::normalize(glm::vec3(0.65f, 0.75f, 0.0f));
 
         addQuad(frontVerts,
             { L * 0.28f, cabinBottom + 0.08f, -roofW + 0.06f },
@@ -392,8 +373,7 @@ namespace Example
 
         windowFront = BasicShape(frontVerts);
 
-        // ???? ????
-        glm::vec3 rearWindowNormal = glm::normalize(glm::vec3(-0.6f, 0.8f, 0.0f));
+                glm::vec3 rearWindowNormal = glm::normalize(glm::vec3(-0.6f, 0.8f, 0.0f));
 
         addQuad(rearVerts,
             { cabinEnd + 0.06f, roofHeight - 0.1f, -roofW * 0.88f },
@@ -404,8 +384,7 @@ namespace Example
 
         windowRear = BasicShape(rearVerts);
 
-        // ????? ???????
-        float doorFront = L * 0.25f;
+                float doorFront = L * 0.25f;
         float doorBack = -L * 0.4f;
         float windowBottom = G + 0.78f;
         float doorTop = G + 1.12f;
@@ -413,16 +392,14 @@ namespace Example
         glm::vec3 nLeft = { 0, 0, -1 };
         glm::vec3 nRight = { 0, 0, 1 };
 
-        // ????
-        addQuad(sideVerts,
+                addQuad(sideVerts,
             { doorFront - 0.08f, windowBottom + 0.02f, W + 0.02f },
             { doorBack + 0.1f, windowBottom + 0.02f, W + 0.02f },
             { doorBack + 0.1f, doorTop - 0.04f, W + 0.02f },
             { doorFront - 0.1f, doorTop - 0.04f, W + 0.02f },
             glassColor, nRight);
 
-        // ????
-        addQuad(sideVerts,
+                addQuad(sideVerts,
             { doorBack + 0.1f, windowBottom + 0.02f, -W - 0.02f },
             { doorFront - 0.08f, windowBottom + 0.02f, -W - 0.02f },
             { doorFront - 0.1f, doorTop - 0.04f, -W - 0.02f },
@@ -452,22 +429,19 @@ namespace Example
         glm::vec3 nLeft = { 0, 0, -1 };
         glm::vec3 nRight = { 0, 0, 1 };
 
-        // "???" ???? ?? ???? (??????? ????????)
-        addQuad(grilleVerts,
+                addQuad(grilleVerts,
             { L + 0.03f, G + 0.18f, -0.35f }, { L + 0.03f, G + 0.18f, 0.35f },
             { L + 0.03f, G + 0.32f, 0.3f }, { L + 0.03f, G + 0.32f, -0.3f },
             black, nFront);
 
-        // ???? ????? (???? ???????)
-        addQuad(grilleVerts,
+                addQuad(grilleVerts,
             { L + 0.04f, G + 0.22f, -0.08f }, { L + 0.04f, G + 0.22f, 0.08f },
             { L + 0.04f, G + 0.28f, 0.06f }, { L + 0.04f, G + 0.28f, -0.06f },
             blueAccent, nFront);
 
         grille = BasicShape(grilleVerts);
 
-        // ????? ????? (?? ???????)
-        float mirrorY = G + 1.0f;
+                float mirrorY = G + 1.0f;
         float mirrorX = L * 0.08f;
 
         addQuad(mirrorVerts,
@@ -482,8 +456,7 @@ namespace Example
 
         mirrors = BasicShape(mirrorVerts);
 
-        // ???? ????? (??? ?????? ??????)
-        float chargeY = G + 0.55f;
+                float chargeY = G + 0.55f;
         float chargeX = -L * 0.2f;
 
         addQuad(chargeVerts,
@@ -493,8 +466,7 @@ namespace Example
             { chargeX - 0.08f, chargeY + 0.1f, -W - 0.02f },
             black, nLeft);
 
-        // ???? LED ??? ???? ?????
-        addQuad(chargeVerts,
+                addQuad(chargeVerts,
             { chargeX - 0.1f, chargeY - 0.02f, -W - 0.025f },
             { chargeX + 0.1f, chargeY - 0.02f, -W - 0.025f },
             { chargeX + 0.1f, chargeY, -W - 0.025f },
@@ -503,8 +475,7 @@ namespace Example
 
         chargingPort = BasicShape(chargeVerts);
 
-        // ????? ????? (flush handles)
-        float handleY = G + 0.8f;
+                float handleY = G + 0.8f;
         float handleX = 0.0f;
         float handleLen = 0.12f;
 

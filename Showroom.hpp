@@ -44,14 +44,12 @@ namespace Example
         Example::BasicShape mainDoorFrame;
 
 
-        ExteriorWallBounds exteriorBounds;      // حدود التصادم
-        BasicShape streetLamps;      // أعمدة الإنارة
-
-        //مشان الدوار
+        ExteriorWallBounds exteriorBounds;          
+        BasicShape streetLamps;      
         Example::BasicShape roundabout;
 
-        SportsCar sportsCarInRoom;      // للغرفة الصفراء (Sports)
-        SUVCar suvCarInRoom;            // للغرفة الخضراء (Family)
+        SportsCar sportsCarInRoom;    
+        SUVCar suvCarInRoom;          
         ElectricCar electricCarInRoom;
 
 

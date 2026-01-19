@@ -18,10 +18,7 @@ namespace Example
         std::vector<BasicVertex> floorV, wallV, lightV, ceilingV;
         auto addPos = [&](glm::vec3 p) { return p + centerOffset; };
 
-        // ═══════════════════════════════════════════════════════════
-        // دوال مساعدة
-        // ═══════════════════════════════════════════════════════════
-
+                        
         auto addQuadWithNormal = [](std::vector<BasicVertex>& verts,
             glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4,
             glm::vec3 col)
@@ -74,39 +71,37 @@ namespace Example
                 addQuadLocal(v, e, f, b, a, col);
             };
 
-        // ═══════════════════════════════════════════════════════════
-        // 🎨 ألوان خاصة بكل غرفة
-        // ═══════════════════════════════════════════════════════════
-
+                        
         glm::vec3 accentColor = { 1.0f, 1.0f, 1.0f };
         glm::vec3 floorColor1, floorColor2;
         glm::vec3 baseboardColor;
 
         if (roomName == "Luxury")
         {
-            accentColor = { 0.85f, 0.70f, 0.25f };  // ذهبي
-            floorColor1 = { 0.12f, 0.12f, 0.14f };  // رخام داكن
-            floorColor2 = { 0.18f, 0.18f, 0.20f };  // رخام فاتح
+            accentColor = { 0.85f, 0.70f, 0.25f };    
+            floorColor1 = { 0.12f, 0.12f, 0.14f };     
+            floorColor2 = { 0.18f, 0.18f, 0.20f };      
             baseboardColor = { 0.08f, 0.08f, 0.10f };
         }
         else if (roomName == "Electric")
         {
-            accentColor = { 0.2f, 0.85f, 1.0f };    // سماوي
-            floorColor1 = { 0.08f, 0.10f, 0.15f };  // أزرق داكن
+            accentColor = { 0.2f, 0.85f, 1.0f };       
+            
+            floorColor1 = { 0.08f, 0.10f, 0.15f };      
             floorColor2 = { 0.12f, 0.14f, 0.20f };
             baseboardColor = { 0.05f, 0.08f, 0.12f };
         }
         else if (roomName == "Sports")
         {
-            accentColor = { 0.95f, 0.15f, 0.15f };  // أحمر
-            floorColor1 = { 0.10f, 0.08f, 0.08f };  // رمادي محمر
+            accentColor = { 0.95f, 0.15f, 0.15f };    
+            floorColor1 = { 0.10f, 0.08f, 0.08f };   
             floorColor2 = { 0.15f, 0.12f, 0.12f };
             baseboardColor = { 0.08f, 0.06f, 0.06f };
         }
         else if (roomName == "Family")
         {
-            accentColor = { 0.4f, 0.85f, 0.4f };    // أخضر
-            floorColor1 = { 0.12f, 0.10f, 0.08f };  // بني دافئ
+            accentColor = { 0.4f, 0.85f, 0.4f };           
+            floorColor1 = { 0.12f, 0.10f, 0.08f };         
             floorColor2 = { 0.18f, 0.15f, 0.12f };
             baseboardColor = { 0.10f, 0.08f, 0.06f };
         }
@@ -117,12 +112,9 @@ namespace Example
             baseboardColor = color * 0.15f;
         }
 
-        // ═══════════════════════════════════════════════════════════
-        // 1. ✨ الأرضية الشطرنجية الفاخرة
-        // ═══════════════════════════════════════════════════════════
-
+                        
         glm::vec3 upNormal = { 0, 1, 0 };
-        float tileSize = 3.0f;  // حجم كل بلاطة
+        float tileSize = 3.0f;         
         int tilesCount = static_cast<int>(size * 2 / tileSize);
 
         for (int i = 0; i < tilesCount; i++)
@@ -134,15 +126,16 @@ namespace Example
                 float x2 = x1 + tileSize;
                 float z2 = z1 + tileSize;
 
-                // تأكد من عدم تجاوز حدود الغرفة
+
+                               
                 x2 = std::min(x2, size);
                 z2 = std::min(z2, size);
 
-                // نمط شطرنجي
+                             
                 bool isDark = (i + j) % 2 == 0;
                 glm::vec3 tileColor = isDark ? floorColor1 : floorColor2;
 
-                // إضافة تباين خفيف للواقعية
+                             
                 float variation = ((i * 7 + j * 13) % 100) / 1000.0f;
                 tileColor += glm::vec3(variation, variation, variation);
 
@@ -155,7 +148,7 @@ namespace Example
             }
         }
 
-        // خطوط الفواصل بين البلاط
+             
         glm::vec3 groutColor = floorColor1 * 0.5f;
         float groutWidth = 0.05f;
 
@@ -164,7 +157,7 @@ namespace Example
             float x = -size + i * tileSize;
             if (x > size) x = size;
 
-            // خط عمودي
+                      
             floorV.push_back({ addPos({x - groutWidth, 0.002f, -size}), groutColor, upNormal });
             floorV.push_back({ addPos({x + groutWidth, 0.002f, -size}), groutColor, upNormal });
             floorV.push_back({ addPos({x + groutWidth, 0.002f, size}), groutColor, upNormal });
@@ -178,7 +171,7 @@ namespace Example
             float z = -size + j * tileSize;
             if (z > size) z = size;
 
-            // خط أفقي
+                       
             floorV.push_back({ addPos({-size, 0.002f, z - groutWidth}), groutColor, upNormal });
             floorV.push_back({ addPos({size, 0.002f, z - groutWidth}), groutColor, upNormal });
             floorV.push_back({ addPos({size, 0.002f, z + groutWidth}), groutColor, upNormal });
@@ -189,22 +182,18 @@ namespace Example
 
         floor = BasicShape(floorV);
 
-        // ═══════════════════════════════════════════════════════════
-        // 2. ✨ المنصات المحسّنة مع LED
-        // ═══════════════════════════════════════════════════════════
-
+                        
         float pW = 4.2f;
         float pD = 5.2f;
         float pH = 0.39f;
         float spacing = 10.5f;
         float pZ = isDoorAtMaxZ ? -size * 0.35f : size * 0.35f;
 
-        // ألوان المنصة المحسنة
-        glm::vec3 pTopColor = { 0.20f, 0.20f, 0.22f };      // سطح داكن أنيق
-        glm::vec3 pSideColor = { 0.12f, 0.12f, 0.14f };     // جوانب أغمق
-        glm::vec3 pEdgeColor = { 0.08f, 0.08f, 0.10f };     // حواف
-        glm::vec3 ledColor = accentColor;                   // لون LED حسب الغرفة
-
+               
+        glm::vec3 pTopColor = { 0.20f, 0.20f, 0.22f };
+        glm::vec3 pSideColor = { 0.12f, 0.12f, 0.14f }; 
+        glm::vec3 pEdgeColor = { 0.08f, 0.08f, 0.10f };     
+        glm::vec3 ledColor = accentColor;                   
         glm::vec3 nUp = { 0, 1, 0 };
         glm::vec3 nFront = { 0, 0, 1 };
         glm::vec3 nBack = { 0, 0, -1 };
@@ -221,15 +210,11 @@ namespace Example
             float pX = podiumPositions[i];
             std::vector<BasicVertex> podiumV;
 
-            // ─────────────────────────────────────────
-            // السطح العلوي مع نمط دائري
-            // ─────────────────────────────────────────
-
-            // الإطار الخارجي للسطح
-            float borderW = 0.15f;
+                                    
+                        float borderW = 0.15f;
             glm::vec3 borderColor = pTopColor * 0.7f;
 
-            // المركز
+                      
             podiumV.push_back({ addPos({pX - pW + borderW, pH, pZ - pD + borderW}), pTopColor, nUp });
             podiumV.push_back({ addPos({pX + pW - borderW, pH, pZ - pD + borderW}), pTopColor, nUp });
             podiumV.push_back({ addPos({pX + pW - borderW, pH, pZ + pD - borderW}), pTopColor, nUp });
@@ -237,8 +222,7 @@ namespace Example
             podiumV.push_back({ addPos({pX + pW - borderW, pH, pZ + pD - borderW}), pTopColor, nUp });
             podiumV.push_back({ addPos({pX - pW + borderW, pH, pZ + pD - borderW}), pTopColor, nUp });
 
-            // الحواف العلوية (4 شرائط)
-            // أمام
+                                  
             podiumV.push_back({ addPos({pX - pW, pH, pZ + pD - borderW}), borderColor, nUp });
             podiumV.push_back({ addPos({pX + pW, pH, pZ + pD - borderW}), borderColor, nUp });
             podiumV.push_back({ addPos({pX + pW, pH, pZ + pD}), borderColor, nUp });
@@ -246,7 +230,7 @@ namespace Example
             podiumV.push_back({ addPos({pX + pW, pH, pZ + pD}), borderColor, nUp });
             podiumV.push_back({ addPos({pX - pW, pH, pZ + pD}), borderColor, nUp });
 
-            // خلف
+                       
             podiumV.push_back({ addPos({pX - pW, pH, pZ - pD}), borderColor, nUp });
             podiumV.push_back({ addPos({pX + pW, pH, pZ - pD}), borderColor, nUp });
             podiumV.push_back({ addPos({pX + pW, pH, pZ - pD + borderW}), borderColor, nUp });
@@ -254,7 +238,7 @@ namespace Example
             podiumV.push_back({ addPos({pX + pW, pH, pZ - pD + borderW}), borderColor, nUp });
             podiumV.push_back({ addPos({pX - pW, pH, pZ - pD + borderW}), borderColor, nUp });
 
-            // يسار
+                      
             podiumV.push_back({ addPos({pX - pW, pH, pZ - pD}), borderColor, nUp });
             podiumV.push_back({ addPos({pX - pW + borderW, pH, pZ - pD}), borderColor, nUp });
             podiumV.push_back({ addPos({pX - pW + borderW, pH, pZ + pD}), borderColor, nUp });
@@ -262,7 +246,7 @@ namespace Example
             podiumV.push_back({ addPos({pX - pW + borderW, pH, pZ + pD}), borderColor, nUp });
             podiumV.push_back({ addPos({pX - pW, pH, pZ + pD}), borderColor, nUp });
 
-            // يمين
+                     
             podiumV.push_back({ addPos({pX + pW - borderW, pH, pZ - pD}), borderColor, nUp });
             podiumV.push_back({ addPos({pX + pW, pH, pZ - pD}), borderColor, nUp });
             podiumV.push_back({ addPos({pX + pW, pH, pZ + pD}), borderColor, nUp });
@@ -270,19 +254,15 @@ namespace Example
             podiumV.push_back({ addPos({pX + pW, pH, pZ + pD}), borderColor, nUp });
             podiumV.push_back({ addPos({pX + pW - borderW, pH, pZ + pD}), borderColor, nUp });
 
-            // ─────────────────────────────────────────
-            // الجوانب
-            // ─────────────────────────────────────────
-
-            // أمام
-            podiumV.push_back({ addPos({pX - pW, 0,  pZ + pD}), pSideColor, nFront });
+                                    
+                        podiumV.push_back({ addPos({pX - pW, 0,  pZ + pD}), pSideColor, nFront });
             podiumV.push_back({ addPos({pX + pW, 0,  pZ + pD}), pSideColor, nFront });
             podiumV.push_back({ addPos({pX + pW, pH, pZ + pD}), pEdgeColor, nFront });
             podiumV.push_back({ addPos({pX - pW, 0,  pZ + pD}), pSideColor, nFront });
             podiumV.push_back({ addPos({pX + pW, pH, pZ + pD}), pEdgeColor, nFront });
             podiumV.push_back({ addPos({pX - pW, pH, pZ + pD}), pEdgeColor, nFront });
 
-            // خلف
+                      
             podiumV.push_back({ addPos({pX + pW, 0,  pZ - pD}), pSideColor, nBack });
             podiumV.push_back({ addPos({pX - pW, 0,  pZ - pD}), pSideColor, nBack });
             podiumV.push_back({ addPos({pX - pW, pH, pZ - pD}), pEdgeColor, nBack });
@@ -290,7 +270,7 @@ namespace Example
             podiumV.push_back({ addPos({pX - pW, pH, pZ - pD}), pEdgeColor, nBack });
             podiumV.push_back({ addPos({pX + pW, pH, pZ - pD}), pEdgeColor, nBack });
 
-            // يسار
+                      
             podiumV.push_back({ addPos({pX - pW, 0,  pZ - pD}), pSideColor, nLeft });
             podiumV.push_back({ addPos({pX - pW, 0,  pZ + pD}), pSideColor, nLeft });
             podiumV.push_back({ addPos({pX - pW, pH, pZ + pD}), pEdgeColor, nLeft });
@@ -298,7 +278,7 @@ namespace Example
             podiumV.push_back({ addPos({pX - pW, pH, pZ + pD}), pEdgeColor, nLeft });
             podiumV.push_back({ addPos({pX - pW, pH, pZ - pD}), pEdgeColor, nLeft });
 
-            // يمين
+                        
             podiumV.push_back({ addPos({pX + pW, 0,  pZ + pD}), pSideColor, nRight });
             podiumV.push_back({ addPos({pX + pW, 0,  pZ - pD}), pSideColor, nRight });
             podiumV.push_back({ addPos({pX + pW, pH, pZ - pD}), pEdgeColor, nRight });
@@ -306,15 +286,12 @@ namespace Example
             podiumV.push_back({ addPos({pX + pW, pH, pZ - pD}), pEdgeColor, nRight });
             podiumV.push_back({ addPos({pX + pW, pH, pZ + pD}), pEdgeColor, nRight });
 
-            // ─────────────────────────────────────────
-            // ✨ شريط LED حول القاعدة
-            // ─────────────────────────────────────────
-
-            float ledH = 0.08f;      // ارتفاع الشريط
-            float ledOffset = 0.02f; // المسافة من الحافة
-            glm::vec3 ledBright = ledColor * 1.5f;  // أكثر سطوعاً
-
-            // LED أمامي
+                                    
+            float ledH = 0.08f;     
+            
+            float ledOffset = 0.02f;   
+            glm::vec3 ledBright = ledColor * 1.5f;  
+                    
             podiumV.push_back({ addPos({pX - pW - ledOffset, ledOffset, pZ + pD + ledOffset}), ledColor, nFront });
             podiumV.push_back({ addPos({pX + pW + ledOffset, ledOffset, pZ + pD + ledOffset}), ledColor, nFront });
             podiumV.push_back({ addPos({pX + pW + ledOffset, ledH, pZ + pD + ledOffset}), ledBright, nFront });
@@ -322,7 +299,7 @@ namespace Example
             podiumV.push_back({ addPos({pX + pW + ledOffset, ledH, pZ + pD + ledOffset}), ledBright, nFront });
             podiumV.push_back({ addPos({pX - pW - ledOffset, ledH, pZ + pD + ledOffset}), ledBright, nFront });
 
-            // LED خلفي
+                    
             podiumV.push_back({ addPos({pX + pW + ledOffset, ledOffset, pZ - pD - ledOffset}), ledColor, nBack });
             podiumV.push_back({ addPos({pX - pW - ledOffset, ledOffset, pZ - pD - ledOffset}), ledColor, nBack });
             podiumV.push_back({ addPos({pX - pW - ledOffset, ledH, pZ - pD - ledOffset}), ledBright, nBack });
@@ -330,7 +307,7 @@ namespace Example
             podiumV.push_back({ addPos({pX - pW - ledOffset, ledH, pZ - pD - ledOffset}), ledBright, nBack });
             podiumV.push_back({ addPos({pX + pW + ledOffset, ledH, pZ - pD - ledOffset}), ledBright, nBack });
 
-            // LED يسار
+                    
             podiumV.push_back({ addPos({pX - pW - ledOffset, ledOffset, pZ - pD - ledOffset}), ledColor, nLeft });
             podiumV.push_back({ addPos({pX - pW - ledOffset, ledOffset, pZ + pD + ledOffset}), ledColor, nLeft });
             podiumV.push_back({ addPos({pX - pW - ledOffset, ledH, pZ + pD + ledOffset}), ledBright, nLeft });
@@ -338,7 +315,7 @@ namespace Example
             podiumV.push_back({ addPos({pX - pW - ledOffset, ledH, pZ + pD + ledOffset}), ledBright, nLeft });
             podiumV.push_back({ addPos({pX - pW - ledOffset, ledH, pZ - pD - ledOffset}), ledBright, nLeft });
 
-            // LED يمين
+                     
             podiumV.push_back({ addPos({pX + pW + ledOffset, ledOffset, pZ + pD + ledOffset}), ledColor, nRight });
             podiumV.push_back({ addPos({pX + pW + ledOffset, ledOffset, pZ - pD - ledOffset}), ledColor, nRight });
             podiumV.push_back({ addPos({pX + pW + ledOffset, ledH, pZ - pD - ledOffset}), ledBright, nRight });
@@ -356,17 +333,14 @@ namespace Example
                 });
         }
 
-        // ═══════════════════════════════════════════════════════════
-        // 3. ✨ إضاءة السقف المحسّنة
-        // ═══════════════════════════════════════════════════════════
-
+                        
         glm::vec3 lCol = { 1.0f, 1.0f, 0.95f };
         glm::vec3 lColBright = { 1.2f, 1.2f, 1.1f };
         glm::vec3 downNormal = { 0, -1, 0 };
         float lS = size * 0.35f;
         float lY = h - 0.01f;
 
-        // الضوء الرئيسي
+               
         lightV.push_back({ addPos({-lS, lY, -lS}), lCol, downNormal });
         lightV.push_back({ addPos({lS, lY, -lS}), lCol, downNormal });
         lightV.push_back({ addPos({lS, lY, lS}), lCol, downNormal });
@@ -374,11 +348,11 @@ namespace Example
         lightV.push_back({ addPos({lS, lY, lS}), lCol, downNormal });
         lightV.push_back({ addPos({-lS, lY, lS}), lCol, downNormal });
 
-        // إطار مضيء حول الضوء
+               
         float frameW = 0.3f;
         glm::vec3 frameGlow = accentColor * 0.8f;
 
-        // أمام
+              
         lightV.push_back({ addPos({-lS - frameW, lY, lS}), frameGlow, downNormal });
         lightV.push_back({ addPos({lS + frameW, lY, lS}), frameGlow, downNormal });
         lightV.push_back({ addPos({lS + frameW, lY, lS + frameW}), frameGlow, downNormal });
@@ -386,7 +360,7 @@ namespace Example
         lightV.push_back({ addPos({lS + frameW, lY, lS + frameW}), frameGlow, downNormal });
         lightV.push_back({ addPos({-lS - frameW, lY, lS + frameW}), frameGlow, downNormal });
 
-        // خلف
+               
         lightV.push_back({ addPos({-lS - frameW, lY, -lS - frameW}), frameGlow, downNormal });
         lightV.push_back({ addPos({lS + frameW, lY, -lS - frameW}), frameGlow, downNormal });
         lightV.push_back({ addPos({lS + frameW, lY, -lS}), frameGlow, downNormal });
@@ -394,7 +368,7 @@ namespace Example
         lightV.push_back({ addPos({lS + frameW, lY, -lS}), frameGlow, downNormal });
         lightV.push_back({ addPos({-lS - frameW, lY, -lS}), frameGlow, downNormal });
 
-        // يسار
+            
         lightV.push_back({ addPos({-lS - frameW, lY, -lS}), frameGlow, downNormal });
         lightV.push_back({ addPos({-lS, lY, -lS}), frameGlow, downNormal });
         lightV.push_back({ addPos({-lS, lY, lS}), frameGlow, downNormal });
@@ -402,7 +376,7 @@ namespace Example
         lightV.push_back({ addPos({-lS, lY, lS}), frameGlow, downNormal });
         lightV.push_back({ addPos({-lS - frameW, lY, lS}), frameGlow, downNormal });
 
-        // يمين
+            
         lightV.push_back({ addPos({lS, lY, -lS}), frameGlow, downNormal });
         lightV.push_back({ addPos({lS + frameW, lY, -lS}), frameGlow, downNormal });
         lightV.push_back({ addPos({lS + frameW, lY, lS}), frameGlow, downNormal });
@@ -412,38 +386,29 @@ namespace Example
 
         ceilingLight = BasicShape(lightV);
 
-        // ═══════════════════════════════════════════════════════════
-        // 4. ✨ الجدران مع Baseboards
-        // ═══════════════════════════════════════════════════════════
-
-        float baseboardH = 0.25f;  // ارتفاع الـ baseboard
-
-        // الجدار الأيسر
-        addQuadWithNormal(wallV,
+                        
+        float baseboardH = 0.25f;  
+                addQuadWithNormal(wallV,
             addPos({ -size, baseboardH, -size }), addPos({ -size, baseboardH, size }),
             addPos({ -size, h, size }), addPos({ -size, h, -size }),
             color);
 
-        // baseboard يسار
-        addQuadWithNormal(wallV,
+                addQuadWithNormal(wallV,
             addPos({ -size, 0, -size }), addPos({ -size, 0, size }),
             addPos({ -size, baseboardH, size }), addPos({ -size, baseboardH, -size }),
             baseboardColor);
 
-        // الجدار الأيمن
-        addQuadWithNormal(wallV,
+                addQuadWithNormal(wallV,
             addPos({ size, baseboardH, size }), addPos({ size, baseboardH, -size }),
             addPos({ size, h, -size }), addPos({ size, h, size }),
             color);
 
-        // baseboard يمين
-        addQuadWithNormal(wallV,
+                addQuadWithNormal(wallV,
             addPos({ size, 0, size }), addPos({ size, 0, -size }),
             addPos({ size, baseboardH, -size }), addPos({ size, baseboardH, size }),
             baseboardColor);
 
-        // الجدار المصمت
-        float doorZ = isDoorAtMaxZ ? size : -size;
+                float doorZ = isDoorAtMaxZ ? size : -size;
         float solidZ = isDoorAtMaxZ ? -size : size;
 
         addQuadWithNormal(wallV,
@@ -451,65 +416,53 @@ namespace Example
             addPos({ size, h, solidZ }), addPos({ -size, h, solidZ }),
             color);
 
-        // baseboard خلفي
-        addQuadWithNormal(wallV,
+                addQuadWithNormal(wallV,
             addPos({ -size, 0, solidZ }), addPos({ size, 0, solidZ }),
             addPos({ size, baseboardH, solidZ }), addPos({ -size, baseboardH, solidZ }),
             baseboardColor);
 
-        // جدار الباب
-        glm::vec3 doorWallNormal = isDoorAtMaxZ ? glm::vec3(0, 0, -1) : glm::vec3(0, 0, 1);
+                glm::vec3 doorWallNormal = isDoorAtMaxZ ? glm::vec3(0, 0, -1) : glm::vec3(0, 0, 1);
 
-        // الجزء الأيسر
-        addQuadWithNormal(wallV,
+                addQuadWithNormal(wallV,
             addPos({ -size, baseboardH, doorZ }), addPos({ -this->doorWidth / 2, baseboardH, doorZ }),
             addPos({ -this->doorWidth / 2, h, doorZ }), addPos({ -size, h, doorZ }),
             color);
 
-        // baseboard أيسر
-        addQuadWithNormal(wallV,
+                addQuadWithNormal(wallV,
             addPos({ -size, 0, doorZ }), addPos({ -this->doorWidth / 2, 0, doorZ }),
             addPos({ -this->doorWidth / 2, baseboardH, doorZ }), addPos({ -size, baseboardH, doorZ }),
             baseboardColor);
 
-        // الجزء الأيمن
-        addQuadWithNormal(wallV,
+                addQuadWithNormal(wallV,
             addPos({ this->doorWidth / 2, baseboardH, doorZ }), addPos({ size, baseboardH, doorZ }),
             addPos({ size, h, doorZ }), addPos({ this->doorWidth / 2, h, doorZ }),
             color);
 
-        // baseboard أيمن
-        addQuadWithNormal(wallV,
+                addQuadWithNormal(wallV,
             addPos({ this->doorWidth / 2, 0, doorZ }), addPos({ size, 0, doorZ }),
             addPos({ size, baseboardH, doorZ }), addPos({ this->doorWidth / 2, baseboardH, doorZ }),
             baseboardColor);
 
-        // فوق الباب
-        addQuadWithNormal(wallV,
+                addQuadWithNormal(wallV,
             addPos({ -this->doorWidth / 2, this->doorHeight, doorZ }),
             addPos({ this->doorWidth / 2, this->doorHeight, doorZ }),
             addPos({ this->doorWidth / 2, h, doorZ }),
             addPos({ -this->doorWidth / 2, h, doorZ }),
             color);
 
-        // ─────────────────────────────────────────
-        // ✨ شريط LED أفقي على الجدران (تحت السقف)
-        // ─────────────────────────────────────────
-
+                        
         float ledStripH = 0.12f;
         float ledStripY = h - 0.5f;
         glm::vec3 wallLedColor = accentColor * 0.6f;
 
-        // LED على الجدار الأيسر
-        wallV.push_back({ addPos({-size + 0.01f, ledStripY, -size}), wallLedColor, {1, 0, 0} });
+                wallV.push_back({ addPos({-size + 0.01f, ledStripY, -size}), wallLedColor, {1, 0, 0} });
         wallV.push_back({ addPos({-size + 0.01f, ledStripY, size}), wallLedColor, {1, 0, 0} });
         wallV.push_back({ addPos({-size + 0.01f, ledStripY + ledStripH, size}), wallLedColor * 1.5f, {1, 0, 0} });
         wallV.push_back({ addPos({-size + 0.01f, ledStripY, -size}), wallLedColor, {1, 0, 0} });
         wallV.push_back({ addPos({-size + 0.01f, ledStripY + ledStripH, size}), wallLedColor * 1.5f, {1, 0, 0} });
         wallV.push_back({ addPos({-size + 0.01f, ledStripY + ledStripH, -size}), wallLedColor * 1.5f, {1, 0, 0} });
 
-        // LED على الجدار الأيمن
-        wallV.push_back({ addPos({size - 0.01f, ledStripY, size}), wallLedColor, {-1, 0, 0} });
+                wallV.push_back({ addPos({size - 0.01f, ledStripY, size}), wallLedColor, {-1, 0, 0} });
         wallV.push_back({ addPos({size - 0.01f, ledStripY, -size}), wallLedColor, {-1, 0, 0} });
         wallV.push_back({ addPos({size - 0.01f, ledStripY + ledStripH, -size}), wallLedColor * 1.5f, {-1, 0, 0} });
         wallV.push_back({ addPos({size - 0.01f, ledStripY, size}), wallLedColor, {-1, 0, 0} });
@@ -518,10 +471,7 @@ namespace Example
 
         walls = BasicShape(wallV);
 
-        // ═══════════════════════════════════════════════════════════
-        // 5. لوح الباب
-        // ═══════════════════════════════════════════════════════════
-
+                        
         float doorHeight = 4.5f;
         glm::vec3 doorColor = color * 0.85f;
 
@@ -541,10 +491,7 @@ namespace Example
         doorTargetAngle = doorOpen ? openAngle : 0.0f;
         doorAngle = doorTargetAngle;
 
-        // ═══════════════════════════════════════════════════════════
-        // 6. الواجهة الخارجية (نفس الكود القديم)
-        // ═══════════════════════════════════════════════════════════
-
+                        
         exteriorDecor.clear();
 
         std::vector<BasicVertex> panelV, frameV, signV, accentV;
@@ -563,8 +510,7 @@ namespace Example
         glm::vec3 baseCol = { 0.10f, 0.10f, 0.12f };
         glm::vec3 accent = accentColor;
 
-        // Panels حول فتحة الباب
-        addQuadLocal(panelV,
+                addQuadLocal(panelV,
             { -size + 0.02f, 0.0f, panelZ },
             { -DW / 2 - sideGap, 0.0f, panelZ },
             { -DW / 2 - sideGap, topY, panelZ },
@@ -585,8 +531,7 @@ namespace Example
             { -DW / 2 - sideGap, topY, panelZ },
             baseCol * 1.05f);
 
-        // Frame حول الباب
-        float frameThickness = 0.25f;
+                float frameThickness = 0.25f;
         float z1 = frameCenterZ - faceSign * 0.08f;
         float z2 = frameCenterZ + faceSign * 0.22f;
 
@@ -594,8 +539,7 @@ namespace Example
         addBoxLocal(frameV, { DW / 2, 0.0f, z1 }, { DW / 2 + frameThickness, DH, z2 }, accent * 0.85f);
         addBoxLocal(frameV, { -DW / 2 - frameThickness, DH, z1 }, { DW / 2 + frameThickness, DH + frameThickness, z2 }, accent);
 
-        // Sign
-        float signH1 = topY + 0.10f;
+                float signH1 = topY + 0.10f;
         float signH2 = topY + 0.90f;
         float signPad = 1.2f;
         float signZ = frameCenterZ + faceSign * 0.03f;
@@ -607,8 +551,7 @@ namespace Example
             { -DW / 2 - signPad, signH2, signZ },
             accent * 0.55f);
 
-        // Accents خاصة
-        if (name == "Electric")
+                if (name == "Electric")
         {
             float w = 0.14f;
             float xEdge = size - 0.30f;
@@ -645,10 +588,7 @@ namespace Example
         exteriorDecor.emplace_back(signV);
         exteriorDecor.emplace_back(accentV);
 
-        // ═══════════════════════════════════════════════════════════
-        // 7. ✨ الديكورات المحسّنة
-        // ═══════════════════════════════════════════════════════════
-
+                        
         decorations.clear();
 
         auto addQuad = [&](std::vector<BasicVertex>& v,
@@ -686,8 +626,7 @@ namespace Example
             addQuad(goldV, addPos({ rug - bw, y + 0.001f, -rug }), addPos({ rug, y + 0.001f, -rug }),
                 addPos({ rug, y + 0.001f, rug }), addPos({ rug - bw, y + 0.001f, rug }), goldCol);
 
-            // ثريا بسيطة
-            float chandY = h - 1.5f;
+                        float chandY = h - 1.5f;
             float chandR = 1.5f;
             glm::vec3 chandColor = goldCol * 0.8f;
             glm::vec3 chandGlow = { 1.0f, 0.95f, 0.8f };
@@ -721,8 +660,7 @@ namespace Example
 
             float edge = size * 0.90f;
 
-            // خطوط نيون على الأرض
-            addQuad(neonV, addPos({ -edge, y, -edge }), addPos({ -edge + lineW, y, -edge }),
+                        addQuad(neonV, addPos({ -edge, y, -edge }), addPos({ -edge + lineW, y, -edge }),
                 addPos({ -edge + lineW, y, edge }), addPos({ -edge, y, edge }), neon);
             addQuad(neonV, addPos({ edge - lineW, y, -edge }), addPos({ edge, y, -edge }),
                 addPos({ edge, y, edge }), addPos({ edge - lineW, y, edge }), neon);
@@ -731,8 +669,7 @@ namespace Example
             addQuad(neonV, addPos({ -edge, y, edge - lineW }), addPos({ edge, y, edge - lineW }),
                 addPos({ edge, y, edge }), addPos({ -edge, y, edge }), neon);
 
-            // نمط سداسي في المنتصف
-            float hexY = 0.015f;
+                        float hexY = 0.015f;
             float hexR = 2.5f;
             int hexSeg = 6;
             for (int i = 0; i < hexSeg; i++)
@@ -760,16 +697,14 @@ namespace Example
             glm::vec3 white = { 0.9f, 0.9f, 0.9f };
             glm::vec3 banner = { 0.08f, 0.08f, 0.08f };
 
-            // شريط سباق أرضي
-            float sW = 2.0f;
+                        float sW = 2.0f;
             addQuad(stripeV,
                 addPos({ -sW, y,  size * 0.95f }),
                 addPos({ sW, y,  size * 0.95f }),
                 addPos({ sW, y, -size * 0.95f }),
                 addPos({ -sW, y, -size * 0.95f }), red);
 
-            // نمط شطرنجي (checkered flag) عند المدخل
-            float checkY = 0.025f;
+                        float checkY = 0.025f;
             float checkSize = 0.8f;
             float checkStart = isDoorAtMaxZ ? size * 0.7f : -size * 0.7f;
 
@@ -790,8 +725,7 @@ namespace Example
                 }
             }
 
-            // بانر على الجدار
-            float by1 = 4.2f, by2 = 6.2f;
+                        float by1 = 4.2f, by2 = 6.2f;
             addQuad(bannerV,
                 addPos({ -size + 0.02f, by1, -4.0f }),
                 addPos({ -size + 0.02f, by1,  4.0f }),
@@ -815,20 +749,17 @@ namespace Example
             glm::vec3 plantGreen = { 0.2f, 0.5f, 0.2f };
             glm::vec3 potColor = { 0.4f, 0.25f, 0.15f };
 
-            // سجادة مع حدود
-            float rug = size * 0.60f;
+                        float rug = size * 0.60f;
             float rugBorderW = 0.4f;
 
-            // مركز السجادة
-            addQuadLocal(rugV,
+                        addQuadLocal(rugV,
                 { -rug + rugBorderW, y, -rug + rugBorderW },
                 { rug - rugBorderW, y, -rug + rugBorderW },
                 { rug - rugBorderW, y, rug - rugBorderW },
                 { -rug + rugBorderW, y, rug - rugBorderW },
                 rugCol);
 
-            // حدود السجادة
-            addQuadLocal(rugV, { -rug, y + 0.001f, -rug }, { rug, y + 0.001f, -rug },
+                        addQuadLocal(rugV, { -rug, y + 0.001f, -rug }, { rug, y + 0.001f, -rug },
                 { rug, y + 0.001f, -rug + rugBorderW }, { -rug, y + 0.001f, -rug + rugBorderW }, rugBorder);
             addQuadLocal(rugV, { -rug, y + 0.001f, rug - rugBorderW }, { rug, y + 0.001f, rug - rugBorderW },
                 { rug, y + 0.001f, rug }, { -rug, y + 0.001f, rug }, rugBorder);
@@ -837,18 +768,15 @@ namespace Example
             addQuadLocal(rugV, { rug - rugBorderW, y + 0.001f, -rug }, { rug, y + 0.001f, -rug },
                 { rug, y + 0.001f, rug }, { rug - rugBorderW, y + 0.001f, rug }, rugBorder);
 
-            // كنبة
-            float sx1 = -size + 0.8f;
+                        float sx1 = -size + 0.8f;
             float sx2 = -size + 2.8f;
             float sz1 = -10.5f;
             float sz2 = -4.5f;
             addBoxLocal(sofaV, { sx1, 0.0f, sz1 }, { sx2, 1.0f, sz2 }, sofaCol);
 
-            // ظهر الكنبة
-            addBoxLocal(sofaV, { sx1, 1.0f, sz1 }, { sx1 + 0.3f, 1.8f, sz2 }, sofaCol * 0.9f);
+                        addBoxLocal(sofaV, { sx1, 1.0f, sz1 }, { sx1 + 0.3f, 1.8f, sz2 }, sofaCol * 0.9f);
 
-            // لوحات حائط
-            float wx = size - 0.05f;
+                        float wx = size - 0.05f;
             float by1 = 3.2f, by2 = 4.2f;
 
             for (int i = 0; i < 3; i++)
@@ -869,15 +797,12 @@ namespace Example
                     artColor);
             }
 
-            // نباتات زينة (أصص بسيطة)
-            float plantX = size - 2.0f;
+                        float plantX = size - 2.0f;
             float plantZ = isDoorAtMaxZ ? -size + 2.0f : size - 2.0f;
 
-            // الأصيص
-            addBoxLocal(plantsV, { plantX - 0.4f, 0, plantZ - 0.4f }, { plantX + 0.4f, 0.6f, plantZ + 0.4f }, potColor);
+                        addBoxLocal(plantsV, { plantX - 0.4f, 0, plantZ - 0.4f }, { plantX + 0.4f, 0.6f, plantZ + 0.4f }, potColor);
 
-            // النبات (مثلث بسيط)
-            int leafSegs = 6;
+                        int leafSegs = 6;
             for (int i = 0; i < leafSegs; i++)
             {
                 float angle1 = (2.0f * 3.14159f * i) / leafSegs;
@@ -898,10 +823,7 @@ namespace Example
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════════
-    // باقي الدوال تبقى كما هي
-    // ═══════════════════════════════════════════════════════════════════
-
+            
     void Room::draw(const glm::mat4& viewProj)
     {
         floor.render(glm::mat4(1.0f), viewProj);
@@ -916,8 +838,7 @@ namespace Example
         for (auto& deco : decorations)
             deco.render(glm::mat4(1.0f), viewProj);
 
-        // رسم الباب
-        float doorZLocal = doorAtMaxZ ? size : -size;
+                float doorZLocal = doorAtMaxZ ? size : -size;
         float faceSign = doorAtMaxZ ? 1.0f : -1.0f;
         glm::vec3 hingeWorld = centerOffset + glm::vec3(-this->doorWidth / 2.0f, 0.0f, doorZLocal + faceSign * 0.03f);
 

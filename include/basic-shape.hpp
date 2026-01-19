@@ -8,13 +8,11 @@
 
 namespace Example
 {
-    // ✅ تعديل: إضافة Normal للـ Vertex
-    struct BasicVertex
+        struct BasicVertex
     {
         glm::vec3 position;
         glm::vec3 color;
-        glm::vec3 normal;  // ✅ جديد
-
+        glm::vec3 normal;  
         BasicVertex() : position(0), color(0), normal(0, 1, 0) {}
 
         BasicVertex(glm::vec3 pos, glm::vec3 col, glm::vec3 norm = { 0, 1, 0 })
@@ -51,24 +49,18 @@ namespace Example
             const glm::mat4& camera = glm::mat4(1.0f),
             float alpha = 1.0f) const;
 
-        // ✅ جديد: الحصول على الشيدر
-        static GLuint getShaderProgram() { return shaderProgram; }
+                static GLuint getShaderProgram() { return shaderProgram; }
     };
 
-    // ═══════════════════════════════════════════════════════════
-    // دوال مساعدة لحساب Normals
-    // ═══════════════════════════════════════════════════════════
-
-    // حساب Normal لمثلث
-    inline glm::vec3 calculateNormal(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3)
+            
+        inline glm::vec3 calculateNormal(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3)
     {
         glm::vec3 edge1 = p2 - p1;
         glm::vec3 edge2 = p3 - p1;
         return glm::normalize(glm::cross(edge1, edge2));
     }
 
-    // إضافة مربع مع Normal صحيح
-    inline void addQuadWithNormal(std::vector<BasicVertex>& verts,
+        inline void addQuadWithNormal(std::vector<BasicVertex>& verts,
         glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4,
         glm::vec3 color)
     {

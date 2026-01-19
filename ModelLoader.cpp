@@ -2,13 +2,11 @@
 #include <vector>
 #include <string>
 
-// مكتبات Assimp
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 
-// مكتباتك
 #include "basic-shape.hpp"
 
 namespace Example {
@@ -16,16 +14,14 @@ namespace Example {
     void loadModelToShape(BasicShape& outShape, const std::string& path, glm::vec3 color) {
         Assimp::Importer importer;
 
-        // القراءة والمعالجة (Triangulate مهم جداً)
-        const aiScene* scene = importer.ReadFile(path,
+                const aiScene* scene = importer.ReadFile(path,
             aiProcess_Triangulate |
             aiProcess_GenSmoothNormals |
             aiProcess_FlipUVs |
             aiProcess_JoinIdenticalVertices);
 
         if (!scene || !scene->mRootNode) {
-            return; // فشل التحميل
-        }
+            return;         }
 
         std::vector<BasicVertex> allVertices;
 
@@ -39,19 +35,15 @@ namespace Example {
 
                     BasicVertex v;
 
-                    // ✅ تصحيح 1: استخدام position بدلاً من pos
-                    v.position = glm::vec3(mesh->mVertices[vIdx].x, mesh->mVertices[vIdx].y, mesh->mVertices[vIdx].z);
+                                        v.position = glm::vec3(mesh->mVertices[vIdx].x, mesh->mVertices[vIdx].y, mesh->mVertices[vIdx].z);
 
-                    // الحصول على المادة (Material) من المش
-                    aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+                                        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
                     aiColor3D diffuseColor(1.0f, 1.0f, 1.0f);
                     material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColor);
 
-                    // استخدام اللون من الخامة
-                    v.color = glm::vec3(diffuseColor.r, diffuseColor.g, diffuseColor.b);
+                                        v.color = glm::vec3(diffuseColor.r, diffuseColor.g, diffuseColor.b);
 
-                    // النورمال
-                    if (mesh->HasNormals()) {
+                                        if (mesh->HasNormals()) {
                         v.normal = glm::vec3(mesh->mNormals[vIdx].x, mesh->mNormals[vIdx].y, mesh->mNormals[vIdx].z);
                     }
                     else {
@@ -63,8 +55,6 @@ namespace Example {
             }
         }
 
-        // ✅ تصحيح 2: استخدام الـ Constructor والـ Assignment بدلاً من دالة create غير الموجودة
-        // هذا السطر ينشئ كائناً جديداً وينقل بياناته إلى outShape
-        outShape = BasicShape(allVertices, GL_TRIANGLES);
+                        outShape = BasicShape(allVertices, GL_TRIANGLES);
     }
 }

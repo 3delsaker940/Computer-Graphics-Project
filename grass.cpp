@@ -16,8 +16,7 @@ namespace Example {
             compileShader();
         }
 
-        // تقاطع مستطيلين لتشكيل عشب
-        float h = 0.8f, w = 0.4f;
+                float h = 0.8f, w = 0.4f;
         std::vector<TexturedVertex> v = {
             {{-w, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
             {{ w, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},

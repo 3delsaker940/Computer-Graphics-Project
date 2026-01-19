@@ -11,8 +11,7 @@ namespace Example {
     };
 
     class TexturedShape {
-    protected: //new
-        GLuint VAO = 0, VBO = 0;
+    protected:         GLuint VAO = 0, VBO = 0;
         int vertexCount = 0;
         GLuint textureID = 0;
 
@@ -23,8 +22,7 @@ namespace Example {
         static void compileShader();
 
     public:
-        std::vector<glm::vec3> instancePositions; //new
-
+        std::vector<glm::vec3> instancePositions; 
         TexturedShape();
         virtual ~TexturedShape();
 

@@ -7,12 +7,8 @@ namespace Example
 {
     LightingManager::LightingManager()
     {
-        // إعداد الإضاءة الاتجاهية الافتراضية
-        directionalLight = DirectionalLight(
-            { -0.2f, -1.0f, -0.3f },  // اتجاه (من أعلى اليسار)
-            { 1.0f, 0.95f, 0.9f },    // لون (أبيض دافئ)
-            0.4f                     // شدة
-        );
+                directionalLight = DirectionalLight(
+            { -0.2f, -1.0f, -0.3f },              { 1.0f, 0.95f, 0.9f },                0.4f                             );
     }
 
     void LightingManager::addPointLight(const PointLight& light)
@@ -49,8 +45,7 @@ namespace Example
 
     void LightingManager::toggleAllLights()
     {
-        lightsOn = !lightsOn;  // ✅ أضف هذا
-
+        lightsOn = !lightsOn;  
         for (auto& light : pointLights)
             light.enabled = !light.enabled;
         for (auto& light : spotLights)
@@ -61,34 +56,22 @@ namespace Example
     {
         glUseProgram(shaderProgram);
 
-        // ─────────────────────────────────────────
-        // الإضاءة المحيطة
-        // ─────────────────────────────────────────
-        glUniform3fv(glGetUniformLocation(shaderProgram, "ambientColor"), 1,
+                                glUniform3fv(glGetUniformLocation(shaderProgram, "ambientColor"), 1,
             glm::value_ptr(ambientColor));
         glUniform1f(glGetUniformLocation(shaderProgram, "ambientIntensity"),
             ambientIntensity);
 
-        // ─────────────────────────────────────────
-        // الإضاءة الاتجاهية
-        // ─────────────────────────────────────────
-        glUniform3fv(glGetUniformLocation(shaderProgram, "dirLight.direction"), 1,
+                                glUniform3fv(glGetUniformLocation(shaderProgram, "dirLight.direction"), 1,
             glm::value_ptr(directionalLight.direction));
         glUniform3fv(glGetUniformLocation(shaderProgram, "dirLight.color"), 1,
             glm::value_ptr(directionalLight.color));
         glUniform1f(glGetUniformLocation(shaderProgram, "dirLight.intensity"),
             directionalLight.intensity);
 
-        // ─────────────────────────────────────────
-        // موقع الكاميرا
-        // ─────────────────────────────────────────
-        glUniform3fv(glGetUniformLocation(shaderProgram, "viewPos"), 1,
+                                glUniform3fv(glGetUniformLocation(shaderProgram, "viewPos"), 1,
             glm::value_ptr(viewPosition));
 
-        // ─────────────────────────────────────────
-        // المصابيح النقطية
-        // ─────────────────────────────────────────
-        int numPointLights = std::min((int)pointLights.size(), 16);
+                                int numPointLights = std::min((int)pointLights.size(), 16);
         glUniform1i(glGetUniformLocation(shaderProgram, "numPointLights"), numPointLights);
 
         for (int i = 0; i < numPointLights; i++)
@@ -105,10 +88,7 @@ namespace Example
                 pointLights[i].radius);
         }
 
-        // ─────────────────────────────────────────
-        // المصابيح المركزة
-        // ─────────────────────────────────────────
-        int numSpotLights = std::min((int)spotLights.size(), 8);
+                                int numSpotLights = std::min((int)spotLights.size(), 8);
         glUniform1i(glGetUniformLocation(shaderProgram, "numSpotLights"), numSpotLights);
 
         for (int i = 0; i < numSpotLights; i++)

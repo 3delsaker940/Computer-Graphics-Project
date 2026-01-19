@@ -20,23 +20,19 @@ namespace Example
 
         BasicShape headlights;
         BasicShape taillights;
-        BasicShape ledStrip;       // ? ???? LED ????
-
+        BasicShape ledStrip;       
         BasicShape windowFront;
         BasicShape windowRear;
         BasicShape windowsSide;
 
-        BasicShape grille;         // ??? ???? (????????)
-        BasicShape mirrors;
-        BasicShape chargingPort;   // ? ???? ?????
-        BasicShape doorHandles;
+        BasicShape grille;                 BasicShape mirrors;
+        BasicShape chargingPort;           BasicShape doorHandles;
 
         glm::vec3 position;
         float rotation;
         glm::vec3 bodyColor;
 
-        // ????? ??????? ?????????? (????? ?????????)
-        float length = 4.8f;
+                float length = 4.8f;
         float width = 2.0f;
         float height = 1.5f;
         float groundClearance = 0.18f;
@@ -53,8 +49,7 @@ namespace Example
         ~ElectricCar() = default;
 
         void create(glm::vec3 pos, float rotationY = 0.0f,
-            glm::vec3 color = { 0.1f, 0.3f, 0.7f });  // ???? ???????
-
+            glm::vec3 color = { 0.1f, 0.3f, 0.7f });  
         void render(const glm::mat4& viewProj);
 
         glm::vec3 getPosition() const { return position; }
