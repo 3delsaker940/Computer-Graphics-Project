@@ -7,7 +7,7 @@
 
 namespace Example
 {
-	GLuint compileShader(GLenum type, const char* source, const std::string& name)
+	GLuint compileShader(GLenum type, const char *source, const std::string &name)
 	{
 		GLuint shader = glCreateShader(type);
 		glShaderSource(shader, 1, &source, nullptr);
@@ -21,14 +21,15 @@ namespace Example
 			char infoLog[512];
 			glGetShaderInfoLog(shader, 512, &length, infoLog);
 
-			std::cout << "Failed to compile shader (" << name << "):\n" << std::string(infoLog, length) << std::endl;
+			std::cout << "Failed to compile shader (" << name << "):\n"
+					  << std::string(infoLog, length) << std::endl;
 			std::exit(1);
 		}
 
 		return shader;
 	}
 
-	GLuint linkShaderProgram(GLuint vertexShader, GLuint fragmentShader, const std::string& name)
+	GLuint linkShaderProgram(GLuint vertexShader, GLuint fragmentShader, const std::string &name)
 	{
 		GLuint shaderProgram = glCreateProgram();
 		glAttachShader(shaderProgram, vertexShader);
@@ -44,14 +45,15 @@ namespace Example
 			char infoLog[512];
 			glGetProgramInfoLog(shaderProgram, 512, &length, infoLog);
 
-			std::cout << "Failed to link shader program (" << name << "):\n" << std::string(infoLog, length) << std::endl;
+			std::cout << "Failed to link shader program (" << name << "):\n"
+					  << std::string(infoLog, length) << std::endl;
 			std::exit(1);
 		}
 
 		return shaderProgram;
 	}
 
-	GLuint compileAndLinkShaderProgram(const char* vertexSource, const char* fragmentSource, const std::string& name)
+	GLuint compileAndLinkShaderProgram(const char *vertexSource, const char *fragmentSource, const std::string &name)
 	{
 		GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexSource, name + "/vertex.glsl");
 		GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentSource, name + "/fragment.glsl");

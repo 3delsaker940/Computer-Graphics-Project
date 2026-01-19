@@ -1,172 +1,105 @@
 ﻿#include "textured-shape.hpp"
-
-#include <iostream>
-#include <cstring>
-
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
 
-namespace Example
-{
+namespace Example {
+  
     GLuint TexturedShape::shaderProgram = 0;
-    GLuint TexturedShape::cameraLoc = 0;
-    GLuint TexturedShape::transformLoc = 0;
-    bool   TexturedShape::shaderReady = false;
+    GLuint TexturedShape::cameraLoc = 0, TexturedShape::transformLoc = 0, TexturedShape::timeLoc = 0;
+    bool TexturedShape::shaderReady = false;
 
-    // ---------------- SHADER SOURCE ----------------
-
-    static const char* vertexSrc = R"(#version 330 core
+        static const char* vertexSrc = R"(#version 330 core
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aColor;
 layout (location = 2) in vec2 aUV;
-
 uniform mat4 transform;
 uniform mat4 camera;
-
-out vec3 vColor;
-
-void main()
-{
-  vColor = aColor;
-  gl_Position = camera * transform * vec4(aPos, 1.0);
-}
-)";
+uniform float time;
+out vec2 vUV;
+void main() {
+    vUV = aUV;
+    vec3 pos = aPos;
+        if(pos.y > 0.1) { 
+       pos.x += sin(time * 3.0 + abs(transform[3][0]) + transform[3][2]) * 0.25;
+    }
+    gl_Position = camera * transform * vec4(pos, 1.0);
+})";
 
     static const char* fragmentSrc = R"(#version 330 core
-in vec3 vColor;
+in vec2 vUV;
 out vec4 FragColor;
+uniform sampler2D ourTexture;
+void main() {
+    vec4 texColor = texture(ourTexture, vUV);
+        if(texColor.a < 0.2) discard; 
+    FragColor = texColor;
+})";
 
-void main()
-{
-  FragColor = vec4(vColor, 1.0);
-}
-)";
+    void TexturedShape::compileShader() {
+        if (shaderReady) return;
 
-    // ---------------- SHADER COMPILATION ----------------
+        GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vs, 1, &vertexSrc, nullptr);
+        glCompileShader(vs);
 
-    static GLuint compile(GLenum type, const char* src)
-    {
-        GLuint s = glCreateShader(type);
-        glShaderSource(s, 1, &src, nullptr);
-        glCompileShader(s);
-
-        GLint ok;
-        glGetShaderiv(s, GL_COMPILE_STATUS, &ok);
-        if (!ok)
-        {
-            char log[1024];
-            glGetShaderInfoLog(s, 1024, nullptr, log);
-            std::cerr << "Shader compile error:\n" << log << std::endl;
-            std::exit(-1);
-        }
-        return s;
-    }
-
-    void TexturedShape::compileShader()
-    {
-        GLuint vs = compile(GL_VERTEX_SHADER, vertexSrc);
-        GLuint fs = compile(GL_FRAGMENT_SHADER, fragmentSrc);
+        GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fs, 1, &fragmentSrc, nullptr);
+        glCompileShader(fs);
 
         shaderProgram = glCreateProgram();
         glAttachShader(shaderProgram, vs);
         glAttachShader(shaderProgram, fs);
         glLinkProgram(shaderProgram);
 
-        GLint ok;
-        glGetProgramiv(shaderProgram, GL_LINK_STATUS, &ok);
-        if (!ok)
-        {
-            char log[1024];
-            glGetProgramInfoLog(shaderProgram, 1024, nullptr, log);
-            std::cerr << "Shader link error:\n" << log << std::endl;
-            std::exit(-1);
-        }
-
-        glDeleteShader(vs);
-        glDeleteShader(fs);
-
         cameraLoc = glGetUniformLocation(shaderProgram, "camera");
         transformLoc = glGetUniformLocation(shaderProgram, "transform");
-
+        timeLoc = glGetUniformLocation(shaderProgram, "time");
         shaderReady = true;
     }
 
-    // ---------------- CONSTRUCTORS ----------------
+    void TexturedShape::renderField(const glm::mat4& camera) const {
+        if (instancePositions.empty() || VAO == 0) return;
 
-    TexturedShape::TexturedShape() {}
-
-    TexturedShape::TexturedShape(const std::vector<TexturedVertex>& vertices)
-    {
-        if (!shaderReady)
-            compileShader();
-
-        vertexCount = static_cast<int>(vertices.size());
-
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-        glBufferData(GL_ARRAY_BUFFER,
-            vertices.size() * sizeof(TexturedVertex),
-            vertices.data(),
-            GL_STATIC_DRAW);
-
-        // position
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-            sizeof(TexturedVertex), (void*)0);
-        glEnableVertexAttribArray(0);
-
-        // color
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-            sizeof(TexturedVertex), (void*)offsetof(TexturedVertex, color));
-        glEnableVertexAttribArray(1);
-
-        // uv
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
-            sizeof(TexturedVertex), (void*)offsetof(TexturedVertex, uv));
-        glEnableVertexAttribArray(2);
-
-        glBindVertexArray(0);
-    }
-
-    // ---------------- MOVE ----------------
-
-    TexturedShape::TexturedShape(TexturedShape&& o) noexcept
-    {
-        *this = std::move(o);
-    }
-
-    TexturedShape& TexturedShape::operator=(TexturedShape&& o) noexcept
-    {
-        VAO = o.VAO; o.VAO = 0;
-        VBO = o.VBO; o.VBO = 0;
-        vertexCount = o.vertexCount;
-        return *this;
-    }
-
-    // ---------------- DESTRUCTOR ----------------
-
-    TexturedShape::~TexturedShape()
-    {
-        if (VBO) glDeleteBuffers(1, &VBO);
-        if (VAO) glDeleteVertexArrays(1, &VAO);
-    }
-
-    // ---------------- RENDER ----------------
-
-    void TexturedShape::render(const glm::mat4& model,
-        const glm::mat4& camera) const
-    {
         glUseProgram(shaderProgram);
 
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE,
-            glm::value_ptr(model));
-        glUniformMatrix4fv(cameraLoc, 1, GL_FALSE,
-            glm::value_ptr(camera));
+                glUniform1f(timeLoc, (float)glfwGetTime());
+
+                glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+
+                glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera));
 
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+
+                for (const auto& pos : instancePositions) {
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
+            glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+            glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+        }
+
         glBindVertexArray(0);
+    }
+
+  
+    TexturedShape::TexturedShape() {}
+    TexturedShape::~TexturedShape() {
+    
+    }
+
+    TexturedShape::TexturedShape(TexturedShape&& other) noexcept {
+        *this = std::move(other);
+    }
+
+    TexturedShape& TexturedShape::operator=(TexturedShape&& other) noexcept {
+        if (this != &other) {
+            this->VAO = other.VAO; other.VAO = 0;
+            this->VBO = other.VBO; other.VBO = 0;
+            this->textureID = other.textureID;
+            this->vertexCount = other.vertexCount;
+            this->instancePositions = std::move(other.instancePositions);
+        }
+        return *this;
     }
 }

@@ -12,7 +12,7 @@
 
 // ملفات المشروع
 #include "basic-shape.hpp"
-#include "Camera.hpp" 
+#include "Camera.hpp"
 
 // تعريف الكائن بشكل عالمي لضمان وصول الـ callback إليه
 Camera camera(glm::vec3(2.4f, 0.0f, 0.5f));
@@ -20,40 +20,54 @@ float lastX = 400, lastY = 300;
 bool firstMouse = true;
 
 // دالة تحريك الماوس
-void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
+void mouse_callback(GLFWwindow *window, double xposIn, double yposIn)
+{
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
-    if (firstMouse) { lastX = xpos; lastY = ypos; firstMouse = false; }
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
     float xoffset = xpos - lastX;
     float yoffset = lastY - ypos;
-    lastX = xpos; lastY = ypos;
+    lastX = xpos;
+    lastY = ypos;
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
-class Application {
+class Application
+{
 public:
     Example::BasicShape shape;
     glm::mat4 transform = glm::mat4(1.0f);
     glm::mat4 cameraMat = glm::mat4(1.0f);
-    GLFWwindow* window;
+    GLFWwindow *window;
     float lastFrameTime = 0.0f;
 
-    void onInit() {
+    void onInit()
+    {
         Example::BasicShape::compileShapeShader();
         // إنشاء مثلث ملون للتجربة كما في مشروعك الأصلي
         shape = Example::BasicShape({
-            { {0.0f, 0.0f, 0.8f }, {1.0f, 0.0f, 0.0f} },
-            { {0.0f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f} },
-            { {0.0f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f} },
-            });
+            {{0.0f, 0.0f, 0.8f}, {1.0f, 0.0f, 0.0f}},
+            {{0.0f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+            {{0.0f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
+        });
     }
 
-    void onUpdate(float t, float dt) {
+    void onUpdate(float t, float dt)
+    {
         // معالجة حركة الكاميرا
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) camera.ProcessKeyboard("FORWARD", dt);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) camera.ProcessKeyboard("BACKWARD", dt);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camera.ProcessKeyboard("LEFT", dt);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camera.ProcessKeyboard("RIGHT", dt);
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            camera.ProcessKeyboard("FORWARD", dt);
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            camera.ProcessKeyboard("BACKWARD", dt);
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            camera.ProcessKeyboard("LEFT", dt);
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            camera.ProcessKeyboard("RIGHT", dt);
 
         // تحديث مصفوفة الكاميرا (Projection * View)
         int width, height;
@@ -63,10 +77,11 @@ public:
         cameraMat = projection * camera.GetViewMatrix();
 
         // تدوير الشكل قليلاً
-        transform = glm::rotate(glm::mat4(1.0f), glm::radians(t * 30.0f), { 0.0f, 0.0f, 1.0f });
+        transform = glm::rotate(glm::mat4(1.0f), glm::radians(t * 30.0f), {0.0f, 0.0f, 1.0f});
     }
 
-    void onDraw() {
+    void onDraw()
+    {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -75,8 +90,10 @@ public:
     }
 };
 
-int main() {
-    if (!glfwInit()) return -1;
+int main()
+{
+    if (!glfwInit())
+        return -1;
 
     Application app;
     // إعدادات النافذة
@@ -85,10 +102,15 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
 
     app.window = glfwCreateWindow(800, 600, "Car Showroom - Step 1", NULL, NULL);
-    if (!app.window) { glfwTerminate(); return -1; }
+    if (!app.window)
+    {
+        glfwTerminate();
+        return -1;
+    }
 
     glfwMakeContextCurrent(app.window);
-    if (!gladLoadGL()) return -1; // تحميل مكتبة GLAD
+    if (!gladLoadGL())
+        return -1; // تحميل مكتبة GLAD
     glEnable(GL_DEPTH_TEST);
 
     // تفعيل الماوس
@@ -97,7 +119,8 @@ int main() {
 
     app.onInit();
 
-    while (!glfwWindowShouldClose(app.window)) {
+    while (!glfwWindowShouldClose(app.window))
+    {
         float t = static_cast<float>(glfwGetTime());
         float dt = t - app.lastFrameTime;
         app.lastFrameTime = t;
