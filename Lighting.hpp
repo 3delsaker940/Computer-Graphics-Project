@@ -86,6 +86,9 @@ namespace Example
     public:
         LightingManager();
 
+        bool lightsOn = true;  // ✅ أضف هذا السطر
+
+
         // إضافة مصابيح
         void addPointLight(const PointLight& light);
         void addSpotLight(const SpotLight& light);

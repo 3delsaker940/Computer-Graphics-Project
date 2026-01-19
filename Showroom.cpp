@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "SportsCar.hpp"
 #include "SUVCar.hpp" 
+extern void audioPlay(const char* file);
 
 namespace Example
 {
@@ -1121,12 +1122,17 @@ namespace Example
         // الزجاج الشفاف أخيراً
         windowGlass.render(glm::mat4(1.0f), viewProj, 0.3f);
     }
-
     void Showroom::toggleLights()
     {
         lighting.toggleAllLights();
-        std::cout << "💡 Lights toggled!" << std::endl;
 
+        // ✅ صوت الإضاءة
+        if (lighting.lightsOn)
+            audioPlay("assets/sounds/kill_switch.wav");
+        else
+            audioPlay("assets/sounds/kill_switch.wav");
+
+        std::cout << "💡 Lights toggled!" << std::endl;
     }
 
     glm::vec3 Showroom::checkCollision(glm::vec3 currentPos, glm::vec3 nextPos)
@@ -1530,6 +1536,11 @@ namespace Example
         if (best && bestDist < 8.0f)
         {
             best->toggleDoor();
+
+            if (best->isDoorOpen())
+                audioPlay("assets/sounds/door_open.wav");
+            else
+                audioPlay("assets/sounds/door_close.wav");
             return true;
         }
         return false;

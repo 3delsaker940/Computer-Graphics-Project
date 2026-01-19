@@ -49,6 +49,8 @@ namespace Example
 
     void LightingManager::toggleAllLights()
     {
+        lightsOn = !lightsOn;  // ✅ أضف هذا
+
         for (auto& light : pointLights)
             light.enabled = !light.enabled;
         for (auto& light : spotLights)
