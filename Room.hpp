@@ -56,6 +56,8 @@ namespace Example
         // ✅ جديد: إضافة سيارة على منصة معينة
         void addCarToPodium(int podiumIndex, glm::vec3 carColor, glm::vec3 interiorColor = { 0.15f, 0.12f, 0.1f });
 
+        void addExistingCarToPodium(int podiumIndex, Example::Car* car);
+
         // ✅ جديد: فحص إذا كان اللاعب قرب باب سيارة
         Car* getCarNearPlayer(glm::vec3 playerPos);
 

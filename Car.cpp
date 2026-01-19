@@ -874,7 +874,19 @@ namespace Example
     {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, position);
-        model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(bodyRot), glm::vec3(0.0f, 1.0f, 0.0f));
+        if (useBodyShape) {
+            glm::mat4 correctedModel = model;
+
+            // ✅ التكبير حسب bodyScale الخاص بهذه السيارة فقط
+            correctedModel = glm::scale(correctedModel, glm::vec3(bodyScale, bodyScale, bodyScale));
+            
+            // الرفع (مقسوم على bodyScale لأن Scale يؤثر على الترجمة)
+            correctedModel = glm::translate(correctedModel, glm::vec3(0.0f, 0.5f, 0.0f));
+
+            bodyShape.render(correctedModel, viewProj);
+            return;
+        }
 
         bodyMain.render(model, viewProj);
         bodyHood.render(model, viewProj);

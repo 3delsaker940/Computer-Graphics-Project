@@ -105,9 +105,14 @@ namespace Example
     public:
         Car();
         ~Car() = default;
+        float bodyScale = 1.0f;  // ✅ أضف هذا السطر
+        float bodyRot = 0.0f;  // ✅ أضف هذا
+
 
         
 
+        BasicShape bodyShape;
+        bool useBodyShape = false;
         
 
         // تهيئة السيارة

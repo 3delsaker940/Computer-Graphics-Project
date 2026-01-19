@@ -1,4 +1,10 @@
-﻿#include <glad/glad.h>
+﻿#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+#include "textured-shape.hpp"
+#include "../grass.hpp"
+#include "../tree.hpp"
+
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
@@ -9,6 +15,27 @@
 #include "../Showroom.hpp"
 #include "../Car.hpp"
 
+//دالة تحميل الصور
+GLuint loadTexture(const char* path)
+{
+    int w, h, ch;
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* data = stbi_load(path, &w, &h, &ch, 0);
+    if (!data) return 0;
+
+    GLuint id;
+    glGenTextures(1, &id);
+    glBindTexture(GL_TEXTURE_2D, id);
+
+    GLenum format = (ch == 4) ? GL_RGBA : GL_RGB;
+    glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(data);
+    return id;
+}
+
+
 class Application
 {
 public:
@@ -17,6 +44,9 @@ public:
 
     Example::Camera appCamera;
     Example::Showroom showroom;
+    Example::Grass grassField;
+    Example::Tree treeField;
+
 
     // ✅ حالة الجلوس في السيارة
     bool isInCar = false;
@@ -46,6 +76,13 @@ public:
         std::cout << "  E       - Enter/Exit car" << std::endl;
         std::cout << "  ESC     - Quit" << std::endl;
         std::cout << "========================================" << std::endl;
+        GLuint grassTex = loadTexture("resources/photos/grass.png");
+        grassField.initGrassField(grassTex, 200.0f, 0.3f);
+
+        GLuint treeTexMini = loadTexture("resources/photos/mini-tree.png");
+        GLuint treeTexHuge = loadTexture("resources/photos/huge-tree.png");
+        treeField.initTrees(treeTexMini, treeTexHuge);
+
     }
 
     void onUpdate()
@@ -174,6 +211,19 @@ public:
 
         showroom.renderAll(viewProj);
 
+        // تفعيل الشفافية
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDepthMask(GL_FALSE);
+
+        // رسم العشب والشجر
+        grassField.draw(viewProj);
+        treeField.draw(viewProj);
+
+        // إعادة العمق
+        glDepthMask(GL_TRUE);
+
+
         // ═══════════════════════════════════════════════════════════
         // عرض حالة اللاعب في العنوان
         // ═══════════════════════════════════════════════════════════
@@ -228,7 +278,7 @@ private:
 
         std::cout << "🚶 Exiting car..." << std::endl;
 
-        
+
 
         // العودة للموقع المحفوظ
         appCamera.Position = savedPosition;

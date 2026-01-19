@@ -1,11 +1,11 @@
 ﻿#include <glad/glad.h>
 #include <vector>
 #include <string>
+
+// مكتبات Assimp
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
-// مكتبات Assimp
 
 
 // مكتباتك
