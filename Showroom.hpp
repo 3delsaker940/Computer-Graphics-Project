@@ -30,7 +30,6 @@ namespace Example
         std::vector<std::unique_ptr<Room>> rooms;
         Example::BasicShape outerGround;
         Example::BasicShape ceiling;
-        Example::BasicShape receptionDesk;
         Example::BasicShape columns;
 
         Example::BasicShape streetAsphalt;

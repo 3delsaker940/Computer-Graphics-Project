@@ -720,65 +720,6 @@ namespace Example
             lineV.push_back({ {x, 0.08f, lW}, lineCol });
         }
 
-        glm::vec3 edgeCol = { 0.9f, 0.9f, 0.9f };
-        float edgeW = 0.08f;
-
-        lineV.push_back({ {roadW - edgeW, 0.06f, lineStart}, edgeCol });
-        lineV.push_back({ {roadW, 0.06f, lineStart}, edgeCol });
-        lineV.push_back({ {roadW, 0.06f, roadLongNS}, edgeCol });
-        lineV.push_back({ {roadW - edgeW, 0.06f, lineStart}, edgeCol });
-        lineV.push_back({ {roadW, 0.06f, roadLongNS}, edgeCol });
-        lineV.push_back({ {roadW - edgeW, 0.06f, roadLongNS}, edgeCol });
-
-        lineV.push_back({ {-roadW, 0.06f, lineStart}, edgeCol });
-        lineV.push_back({ {-roadW + edgeW, 0.06f, lineStart}, edgeCol });
-        lineV.push_back({ {-roadW + edgeW, 0.06f, roadLongNS}, edgeCol });
-        lineV.push_back({ {-roadW, 0.06f, lineStart}, edgeCol });
-        lineV.push_back({ {-roadW + edgeW, 0.06f, roadLongNS}, edgeCol });
-        lineV.push_back({ {-roadW, 0.06f, roadLongNS}, edgeCol });
-
-        lineV.push_back({ {roadW - edgeW, 0.06f, -roadLongNS}, edgeCol });
-        lineV.push_back({ {roadW, 0.06f, -roadLongNS}, edgeCol });
-        lineV.push_back({ {roadW, 0.06f, -lineStart}, edgeCol });
-        lineV.push_back({ {roadW - edgeW, 0.06f, -roadLongNS}, edgeCol });
-        lineV.push_back({ {roadW, 0.06f, -lineStart}, edgeCol });
-        lineV.push_back({ {roadW - edgeW, 0.06f, -lineStart}, edgeCol });
-
-        lineV.push_back({ {-roadW, 0.06f, -roadLongNS}, edgeCol });
-        lineV.push_back({ {-roadW + edgeW, 0.06f, -roadLongNS}, edgeCol });
-        lineV.push_back({ {-roadW + edgeW, 0.06f, -lineStart}, edgeCol });
-        lineV.push_back({ {-roadW, 0.06f, -roadLongNS}, edgeCol });
-        lineV.push_back({ {-roadW + edgeW, 0.06f, -lineStart}, edgeCol });
-        lineV.push_back({ {-roadW, 0.06f, -lineStart}, edgeCol });
-
-        lineV.push_back({ {lineStart, 0.06f, roadW - edgeW}, edgeCol });
-        lineV.push_back({ {roadLongEW, 0.06f, roadW - edgeW}, edgeCol });
-        lineV.push_back({ {roadLongEW, 0.06f, roadW}, edgeCol });
-        lineV.push_back({ {lineStart, 0.06f, roadW - edgeW}, edgeCol });
-        lineV.push_back({ {roadLongEW, 0.06f, roadW}, edgeCol });
-        lineV.push_back({ {lineStart, 0.06f, roadW}, edgeCol });
-
-        lineV.push_back({ {lineStart, 0.06f, -roadW}, edgeCol });
-        lineV.push_back({ {roadLongEW, 0.06f, -roadW}, edgeCol });
-        lineV.push_back({ {roadLongEW, 0.06f, -roadW + edgeW}, edgeCol });
-        lineV.push_back({ {lineStart, 0.06f, -roadW}, edgeCol });
-        lineV.push_back({ {roadLongEW, 0.06f, -roadW + edgeW}, edgeCol });
-        lineV.push_back({ {lineStart, 0.06f, -roadW + edgeW}, edgeCol });
-
-        lineV.push_back({ {-roadLongEW, 0.06f, roadW - edgeW}, edgeCol });
-        lineV.push_back({ {-lineStart, 0.06f, roadW - edgeW}, edgeCol });
-        lineV.push_back({ {-lineStart, 0.06f, roadW}, edgeCol });
-        lineV.push_back({ {-roadLongEW, 0.06f, roadW - edgeW}, edgeCol });
-        lineV.push_back({ {-lineStart, 0.06f, roadW}, edgeCol });
-        lineV.push_back({ {-roadLongEW, 0.06f, roadW}, edgeCol });
-
-        lineV.push_back({ {-roadLongEW, 0.06f, -roadW}, edgeCol });
-        lineV.push_back({ {-lineStart, 0.06f, -roadW}, edgeCol });
-        lineV.push_back({ {-lineStart, 0.06f, -roadW + edgeW}, edgeCol });
-        lineV.push_back({ {-roadLongEW, 0.06f, -roadW}, edgeCol });
-        lineV.push_back({ {-lineStart, 0.06f, -roadW + edgeW}, edgeCol });
-        lineV.push_back({ {-roadLongEW, 0.06f, -roadW + edgeW}, edgeCol });
-
         streetLines = BasicShape(lineV);
 
 

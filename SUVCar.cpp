@@ -182,7 +182,7 @@ namespace Example
         float W = width / 2.0f;
 
         // ????? ????? ???? ??? SUV
-        float wheelRadius = 0.42f;
+        float wheelRadius = 0.4f;
         float wheelWidth = 0.28f;
         float rimRadius = 0.28f;
 
