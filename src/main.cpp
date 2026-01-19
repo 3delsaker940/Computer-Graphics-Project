@@ -85,7 +85,6 @@ public:
         treeField.initTrees(treeTexMini, treeTexHuge);
 
     }
-
     void onUpdate()
     {
         float t = (float)glfwGetTime();
@@ -118,6 +117,7 @@ public:
             }
             eKeyWasPressed = ePressed;
 
+            // زر F لفتح/إغلاق باب الغرفة
             static bool fKeyWasPressed = false;
             bool fPressed = glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS;
             if (fPressed && !fKeyWasPressed)
@@ -128,19 +128,22 @@ public:
         }
         else
         {
+            // ─────────────────────────────────────────
+            // وضع قيادة السيارة
+            // ─────────────────────────────────────────
             if (!currentCar)
             {
                 isInCar = false;
                 return;
             }
 
-            // E للخروج (إذا خرجت لا تكمل نفس الفريم)
+            // E للخروج من السيارة
             bool ePressed = glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS;
             if (ePressed && !eKeyWasPressed)
             {
                 exitCar();
                 eKeyWasPressed = ePressed;
-                return; // ✅ مهم جداً لمنع استدعاء setThrottle بعد currentCar=nullptr
+                return; // مهم حتى لا نكمل باستخدام currentCar بعد ما تصير nullptr
             }
             eKeyWasPressed = ePressed;
 
@@ -148,36 +151,63 @@ public:
             float tInput = 0.0f;
             if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) tInput += 1.0f;
             if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) tInput -= 1.0f;
-
             currentCar->setThrottle(tInput);
 
+            // A/D للتوجيه
             float sInput = 0.0f;
             if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) sInput -= 1.0f;
             if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) sInput += 1.0f;
-
             currentCar->setSteer(sInput);
-
-            // بعد تحديث السيارة (showroom.update) سنثبت الكاميرا بالمقعد
         }
 
-
-        // تحديث تحريك الأبواب
+        // تحديث الأبواب + السيارات
         showroom.update(dt);
 
+        // ═══════════════════════════════════════════════════════════
+        // الأصوات العالمية:
+        // خارج المعرض = ريح ، داخل المعرض = موسيقى
+        // ═══════════════════════════════════════════════════════════
+        {
+            const float buildingHalfSize = 70.0f; // نفس showroomSize في Showroom::init
+
+            bool isOutside =
+                (appCamera.Position.x < -buildingHalfSize) ||
+                (appCamera.Position.x > buildingHalfSize) ||
+                (appCamera.Position.z < -buildingHalfSize) ||
+                (appCamera.Position.z > buildingHalfSize);
+
+            static bool wasOutside = false;
+
+            if (isOutside && !wasOutside)
+            {
+                // انتقلت من داخل -> خارج
+                audioOutdoorStart();
+                audioIndoorStop();
+            }
+            else if (!isOutside && wasOutside)
+            {
+                // انتقلت من خارج -> داخل
+                audioOutdoorStop();
+                audioIndoorStart();
+            }
+
+            wasOutside = isOutside;
+        }
+
+        // تثبيت الكاميرا في مقعد السائق إذا كنا داخل السيارة
         if (isInCar && currentCar)
         {
             appCamera.Position = currentCar->getDriverSeatPosition();
         }
 
-        // ESC للخروج
+        // ESC للخروج من البرنامج
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
 
-
-        // ✅ تحديث موقع الكاميرا للإضاءة
+        // تحديث موقع الكاميرا للإضاءة
         showroom.lighting.setViewPosition(appCamera.Position);
 
-        // ✅ زر L لتبديل الإضاءة
+        // زر L لتبديل الإضاءة
         static bool lKeyWasPressed = false;
         bool lPressed = glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS;
         if (lPressed && !lKeyWasPressed)
@@ -200,34 +230,25 @@ public:
 
         // لون الخلفية
         if (isInCar)
-        {
             glClearColor(0.02f, 0.02f, 0.03f, 1.0f);  // أغمق داخل السيارة
-        }
         else
-        {
             glClearColor(0.05f, 0.05f, 0.1f, 1.0f);
-        }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         showroom.renderAll(viewProj);
 
-        // تفعيل الشفافية
+        // تفعيل الشفافية لرسم العشب والشجر
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthMask(GL_FALSE);
 
-        // رسم العشب والشجر
         grassField.draw(viewProj);
         treeField.draw(viewProj);
 
-        // إعادة العمق
         glDepthMask(GL_TRUE);
 
-
-        // ═══════════════════════════════════════════════════════════
-        // عرض حالة اللاعب في العنوان
-        // ═══════════════════════════════════════════════════════════
+        // تحديث عنوان النافذة
         updateWindowTitle();
     }
 
@@ -252,6 +273,7 @@ private:
 
         std::cout << "🚗 Entering car..." << std::endl;
 
+        audioPlay("assets/sounds/engine_start.flac");
         currentCar = car;
         isInCar = true;
         currentCar->setDriverDoorOpen(true);
